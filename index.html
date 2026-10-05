@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GPU Finder</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div class="app">
+    <aside class="sidebar">
+        <a class="logo" href="index.html" aria-label="GPU Finder home">
+            <span class="logo-icon" aria-hidden="true">
+                <svg viewBox="0 0 60 53" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M17.2115 52.8962L20.7656 50.3033L19.5362 48.6181L20.7212 47.7536L23.1805 51.1247L37.9919 40.3192L35.5325 36.9481L59.2295 19.6601L44.8866 0L5.19331 28.958L3.55412 26.7112L0 29.3041L17.2115 52.8962Z" fill="#04375C"/>
+                </svg>
+            </span>
+            <span>
+                <strong>GPU Finder</strong>
+                <small>Find Your Next Upgrade</small>
+            </span>
+        </a>
+
+        <nav class="sidebar-nav" aria-label="Primary navigation">
+            <a href="index.html" class="nav-link active"><span class="nav-icon">⌂</span>Home</a>
+            <a href="browse.html" class="nav-link"><span class="nav-icon">◉</span>Browse GPUs</a>
+            <a href="compare.html" class="nav-link"><span class="nav-icon">⇄</span>Compare</a>
+            <a href="analytics.html" class="nav-link"><span class="nav-icon">⌁</span>Analytics</a>
+            <a href="rankings.html" class="nav-link"><span class="nav-icon">♜</span>Rankings</a>
+        </nav>
+
+        <div class="sidebar-promo">
+            <div>
+                <h3>Better GPUs.<br>Brighter Builds.</h3>
+                <p>Smarter choices for a faster tomorrow.</p>
+            </div>
+            <a class="promo-button" href="browse.html">Explore GPUs →</a>
+        </div>
+    </aside>
+
+    <main class="main">
+        <header class="topbar">
+            <form
+    class="search-wrapper"
+    id="homeSearchForm"
+>
+    <span class="search-icon">
+        ⌕
+    </span>
+
+    <input
+        id="searchInput"
+        type="text"
+        placeholder='Search GPUs, e.g. "RTX 4090", "RX 7800 XT"...'
+        autocomplete="off"
+    >
+
+    <button
+        class="search-button"
+        type="submit"
+    >
+        Search
+    </button>
+</form>
+            <div class="top-links"><a href="#brandOverview">About</a></div>
+        </header>
+
+        <section class="hero">
+            <div class="hero-content">
+                <span class="eyebrow">EXPLORE. COMPARE. UPGRADE.</span>
+                <h1>Find, Compare, and Analyze GPUs</h1>
+                <p>Your all-in-one platform to discover, compare, analyze, and find the best GPUs for gaming, creativity, and AI.</p>
+                <div class="hero-buttons">
+                    <a class="primary-btn" href="browse.html">Browse GPUs →</a>
+                </div>
+            </div>
+        </section>
+
+        <section class="quick-grid" aria-label="GPU Finder features">
+            <a href="browse.html" class="quick-card">
+                <span class="quick-icon">🔎</span>
+                <span class="quick-info"><strong>Browse GPUs</strong><small>Explore the latest and past GPUs from all major brands.</small></span>
+                <span class="quick-arrow">→</span>
+            </a>
+            <a href="compare.html" class="quick-card">
+                <span class="quick-icon">⇄</span>
+                <span class="quick-info"><strong>Compare GPUs</strong><small>Side-by-side comparisons made simple.</small></span>
+                <span class="quick-arrow">→</span>
+            </a>
+            <a href="analytics.html" class="quick-card">
+                <span class="quick-icon">⌁</span>
+                <span class="quick-info"><strong>Performance Analytics</strong><small>Real-world benchmarks, trends, and insights.</small></span>
+                <span class="quick-arrow">→</span>
+            </a>
+            <a href="rankings.html" class="quick-card">
+                <span class="quick-icon">♜</span>
+                <span class="quick-info"><strong>GPU Rankings</strong><small>See the top GPUs for gaming, creativity, AI, and more.</small></span>
+                <span class="quick-arrow">→</span>
+            </a>
+        </section>
+
+        <section class="content-grid">
+            <section class="panel featured-panel">
+                <div class="panel-header">
+                    <div>
+                        <h2>★ Featured GPUs</h2>
+                        <p>Live GPU data from your API, including local product images.</p>
+                    </div>
+                    <a class="text-button" href="browse.html">View All →</a>
+                </div>
+                <div class="gpu-grid" id="featuredGPUs" aria-live="polite"></div>
+            </section>
+
+            <section class="panel performance-panel">
+                <div class="panel-header">
+                    <div>
+                        <h2>▥ Performance Trends</h2>
+                        <p>Automatically recalculated from the GPUs currently in your API.</p>
+                    </div>
+                    <select id="performanceMetric" aria-label="Performance metric">
+                        <option value="memory_bandwidth_gbps">Memory Bandwidth</option>
+                        <option value="vram">VRAM</option>
+                        <option value="core_count">Core Count</option>
+                        <option value="boost_clock">Boost Clock</option>
+                        <option value="launch_price_usd">Launch Price</option>
+                    </select>
+                </div>
+                <div class="chart-placeholder" id="performanceChart">
+                    <canvas id="gpuTrendChart" aria-label="GPU performance trend chart"></canvas>
+                </div>
+            </section>
+
+            <section class="panel brand-panel">
+                <div class="panel-header">
+                    <div>
+                        <h2>▥ Brand Overview</h2>
+                        <p>Each brand shows the GPU with the highest VRAM in your API.</p>
+                    </div>
+                </div>
+
+                <div class="brand-grid" id="brandOverview">
+                    <article class="brand-card" data-brand="NVIDIA">
+                        <h3>NVIDIA</h3>
+                        <p>World-leading GPUs for gaming, creativity, and AI.</p>
+                        <div class="brand-stats">
+                            <span><strong id="nvidiaVram">--</strong>Highest VRAM</span>
+                            <span><strong id="nvidiaSeries">--</strong>Series</span>
+                            <span><strong id="nvidiaPlatform">--</strong>Platform</span>
+                        </div>
+                    </article>
+
+                    <article class="brand-card" data-brand="AMD">
+                        <h3>AMD</h3>
+                        <p>High-performance GPUs for gamers and creators.</p>
+                        <div class="brand-stats">
+                            <span><strong id="amdVram">--</strong>Highest VRAM</span>
+                            <span><strong id="amdSeries">--</strong>Series</span>
+                            <span><strong id="amdPlatform">--</strong>Platform</span>
+                        </div>
+                    </article>
+
+                    <article class="brand-card" data-brand="Intel">
+                        <h3>Intel</h3>
+                        <p>New possibilities in graphics and AI acceleration.</p>
+                        <div class="brand-stats">
+                            <span><strong id="intelVram">--</strong>Highest VRAM</span>
+                            <span><strong id="intelSeries">--</strong>Series</span>
+                            <span><strong id="intelPlatform">--</strong>Platform</span>
+                        </div>
+                    </article>
+                </div>
+            </section>
+
+            <section class="panel assistant-panel">
+                <div class="assistant-text">
+                    <span class="eyebrow">READY FOR A BETTER GPU?</span>
+                    <h2>Find Your Perfect GPU Today</h2>
+                    <p>Compare, analyze, and discover the best GPUs for your needs.</p>
+                    <a class="primary-btn" href="browse.html">Get Started →</a>
+                </div>
+
+                <div class="assistant-widget">
+                    <button class="character-button" id="helpButton" type="button" aria-label="Open GPU Finder Assistant">
+                        <img src="assets/character.svg" alt="GPU Finder Assistant" class="assistant-character">
+                    </button>
+
+                    <div class="mini-chat" id="miniChat" aria-live="polite">
+                        <div class="chat-header">
+                            <div><strong>GPU Finder Assistant</strong><span>Powered by Gemini</span></div>
+                            <button class="chat-close" id="chatClose" type="button" aria-label="Close chat">×</button>
+                        </div>
+                        <div class="chat-messages" id="chatMessages">
+                            <div class="chat-message bot-message">Hey! Need help finding or comparing a GPU?</div>
+                        </div>
+                        <div class="chat-typing" id="chatTyping">Thinking...</div>
+                        <form class="chat-form" id="chatForm">
+                            <input id="chatInput" type="text" placeholder="Ask about GPUs..." autocomplete="off" maxlength="500">
+                            <button class="chat-send" id="chatSend" type="submit">Send</button>
+                        </form>
+                    </div>
+                </div>
+            </section>
+        </section>
+    </main>
+</div>
+
+<!-- =========================================
+     GPU DETAILS MODAL
+========================================== -->
+
+<div
+    class="gpu-modal"
+    id="gpuDetailsModal"
+    aria-hidden="true"
+>
+    <div class="gpu-modal-overlay" id="gpuModalOverlay"></div>
+
+    <div
+        class="gpu-modal-content"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="gpuModalTitle"
+    >
+
+        <button
+            class="gpu-modal-close"
+            id="gpuModalClose"
+            type="button"
+            aria-label="Close GPU details"
+        >
+            ×
+        </button>
+
+        <div id="gpuModalBody"></div>
+
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+<script src="js/script.js"></script>
+</body>
+</html>

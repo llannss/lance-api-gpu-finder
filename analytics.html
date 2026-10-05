@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>GPU Analytics - GPU Finder</title>
+
+    <link
+        rel="stylesheet"
+        href="css/style.css"
+    >
+</head>
+
+
+<body>
+
+<div class="app">
+
+
+    <!-- =========================================
+         SIDEBAR
+    ========================================== -->
+
+    <aside class="sidebar">
+
+        <a
+            href="index.html"
+            class="logo"
+        >
+
+            <div class="logo-icon">
+
+                <svg
+                    viewBox="0 0 60 53"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                >
+                    <path
+                        d="M17.2115 52.8962L20.7656 50.3033L19.5362 48.6181L20.7212 47.7536L23.1805 51.1247L37.9919 40.3192L35.5325 36.9481L59.2295 19.6601L44.8866 0L5.19331 28.958L3.55412 26.7112L0 29.3041L17.2115 52.8962Z"
+                        fill="#04375C"
+                    />
+                </svg>
+
+            </div>
+
+
+            <div class="logo-text">
+
+                <h1>
+                    GPU Finder
+                </h1>
+
+                <p>
+                    Find Your Next Upgrade
+                </p>
+
+            </div>
+
+        </a>
+
+
+        <nav class="sidebar-nav">
+
+            <a
+                href="index.html"
+                class="nav-link"
+            >
+                <span class="nav-icon">
+                    ⌂
+                </span>
+
+                <span>
+                    Home
+                </span>
+            </a>
+
+
+            <a
+                href="browse.html"
+                class="nav-link"
+            >
+                <span class="nav-icon">
+                    ◉
+                </span>
+
+                <span>
+                    Browse GPUs
+                </span>
+            </a>
+
+
+            <a
+                href="compare.html"
+                class="nav-link"
+            >
+                <span class="nav-icon">
+                    ⇄
+                </span>
+
+                <span>
+                    Compare
+                </span>
+            </a>
+
+
+            <a
+                href="analytics.html"
+                class="nav-link active"
+            >
+                <span class="nav-icon">
+                    ⌁
+                </span>
+
+                <span>
+                    Analytics
+                </span>
+            </a>
+
+
+            <a
+                href="rankings.html"
+                class="nav-link"
+            >
+                <span class="nav-icon">
+                    ♜
+                </span>
+
+                <span>
+                    Rankings
+                </span>
+            </a>
+
+        </nav>
+
+
+        <div class="sidebar-promo">
+
+            <div>
+
+                <h3>
+                    Better GPUs.<br>
+                    Brighter Builds.
+                </h3>
+
+                <p>
+                    Smarter choices for a faster tomorrow.
+                </p>
+
+            </div>
+
+
+            <a
+                href="browse.html"
+                class="promo-button"
+            >
+                Explore GPUs →
+            </a>
+
+        </div>
+
+    </aside>
+
+
+
+    <!-- =========================================
+         MAIN
+    ========================================== -->
+
+    <main class="main analytics-page">
+
+
+        <!-- SEARCH -->
+
+        <header class="topbar">
+
+            <form
+    class="search-wrapper"
+    id="homeSearchForm"
+>
+    <span class="search-icon">
+        ⌕
+    </span>
+
+    <input
+        id="searchInput"
+        type="text"
+        placeholder='Search GPUs, e.g. "RTX 4090", "RX 7800 XT"...'
+        autocomplete="off"
+    >
+
+    <button
+        class="search-button"
+        type="submit"
+    >
+        Search
+    </button>
+</form>
+
+        </header>
+
+
+
+        <!-- =========================================
+             HEADER
+        ========================================== -->
+
+        <section class="analytics-header">
+
+            <div>
+
+                <span class="analytics-eyebrow">
+                    GPU DATA INSIGHTS
+                </span>
+
+                <h1>
+                    Performance Analytics
+                </h1>
+
+                <p>
+                    Explore trends across GPU generations,
+                    brands, pricing, memory, and specifications.
+                </p>
+
+            </div>
+
+
+            <div class="analytics-filter">
+
+                <label for="analyticsBrandFilter">
+                    Brand
+                </label>
+
+                <select id="analyticsBrandFilter">
+
+                    <option value="ALL">
+                        All Brands
+                    </option>
+
+                    <option value="NVIDIA">
+                        NVIDIA
+                    </option>
+
+                    <option value="AMD">
+                        AMD
+                    </option>
+
+                    <option value="INTEL">
+                        Intel
+                    </option>
+
+                </select>
+
+            </div>
+
+        </section>
+
+
+
+        <!-- =========================================
+             SUMMARY CARDS
+        ========================================== -->
+
+        <section class="analytics-stats">
+
+            <article class="analytics-stat-card">
+
+                <div class="analytics-stat-icon">
+                    ▦
+                </div>
+
+                <div>
+
+                    <span>
+                        Total GPUs
+                    </span>
+
+                    <strong id="analyticsTotalGPUs">
+                        --
+                    </strong>
+
+                    <small id="analyticsTotalSubtext">
+                        Available in database
+                    </small>
+
+                </div>
+
+            </article>
+
+
+
+            <article class="analytics-stat-card">
+
+                <div class="analytics-stat-icon">
+                    $
+                </div>
+
+                <div>
+
+                    <span>
+                        Average Launch Price
+                    </span>
+
+                    <strong id="analyticsAveragePrice">
+                        --
+                    </strong>
+
+                    <small>
+                        Across filtered GPUs
+                    </small>
+
+                </div>
+
+            </article>
+
+
+
+            <article class="analytics-stat-card">
+
+                <div class="analytics-stat-icon">
+                    ◫
+                </div>
+
+                <div>
+
+                    <span>
+                        Highest VRAM
+                    </span>
+
+                    <strong id="analyticsHighestVram">
+                        --
+                    </strong>
+
+                    <small id="analyticsHighestVramGpu">
+                        --
+                    </small>
+
+                </div>
+
+            </article>
+
+
+
+            <article class="analytics-stat-card">
+
+                <div class="analytics-stat-icon">
+                    ↗
+                </div>
+
+                <div>
+
+                    <span>
+                        Latest GPU
+                    </span>
+
+                    <strong id="analyticsLatestGpu">
+                        --
+                    </strong>
+
+                    <small id="analyticsLatestDate">
+                        --
+                    </small>
+
+                </div>
+
+            </article>
+
+        </section>
+
+
+
+        <!-- =========================================
+             CHART ROW 1
+        ========================================== -->
+
+        <section class="analytics-grid">
+
+
+            <!-- GENERATION TREND -->
+
+            <article class="analytics-panel analytics-trend-panel">
+
+                <div class="analytics-panel-header">
+
+                    <div>
+
+                        <h2>
+                            Generation Trends
+                        </h2>
+
+                        <p>
+                            Track hardware specifications across release years.
+                        </p>
+
+                    </div>
+
+
+                    <select id="analyticsMetric">
+
+                        <option value="memory_bandwidth_gbps">
+                            Memory Bandwidth
+                        </option>
+
+                        <option value="vram">
+                            VRAM
+                        </option>
+
+                        <option value="launch_price_usd">
+                            Launch Price
+                        </option>
+
+                        <option value="boost_clock">
+                            Boost Clock
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <div class="analytics-chart">
+
+                    <canvas id="analyticsTrendChart"></canvas>
+
+                </div>
+
+            </article>
+
+
+
+            <!-- BRAND DISTRIBUTION -->
+
+            <article class="analytics-panel">
+
+                <div class="analytics-panel-header">
+
+                    <div>
+
+                        <h2>
+                            Brand Distribution
+                        </h2>
+
+                        <p>
+                            GPUs currently stored in your API.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div class="analytics-chart analytics-chart-small">
+
+                    <canvas id="analyticsBrandChart"></canvas>
+
+                </div>
+
+            </article>
+
+        </section>
+
+
+
+        <!-- =========================================
+             CHART ROW 2
+        ========================================== -->
+
+        <section class="analytics-grid analytics-grid-secondary">
+
+
+            <!-- PRICE / BANDWIDTH -->
+
+            <article class="analytics-panel">
+
+                <div class="analytics-panel-header">
+
+                    <div>
+
+                        <h2>
+                            Price vs Memory Bandwidth
+                        </h2>
+
+                        <p>
+                            See how launch price relates to memory bandwidth.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div class="analytics-chart">
+
+                    <canvas id="analyticsPriceChart"></canvas>
+
+                </div>
+
+            </article>
+
+
+
+            <!-- TOP GPU TABLE -->
+
+            <article class="analytics-panel">
+
+                <div class="analytics-panel-header">
+
+                    <div>
+
+                        <h2>
+                            Top Specifications
+                        </h2>
+
+                        <p>
+                            Leaders based on measurable hardware data.
+                        </p>
+
+                    </div>
+
+
+                    <select id="analyticsRankingMetric">
+
+                        <option value="vram">
+                            VRAM
+                        </option>
+
+                        <option value="memory_bandwidth_gbps">
+                            Bandwidth
+                        </option>
+
+                        <option value="launch_price_usd">
+                            Launch Price
+                        </option>
+
+                        <option value="boost_clock">
+                            Boost Clock
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <div
+                    class="analytics-ranking-list"
+                    id="analyticsRankingList"
+                >
+                </div>
+
+            </article>
+
+        </section>
+
+
+    </main>
+
+</div>
+
+
+<script
+    src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"
+></script>
+
+<script src="js/script.js"></script>
+
+</body>
+
+</html>
