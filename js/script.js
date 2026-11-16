@@ -2564,391 +2564,374 @@ function renderCompareSelected(
 // COMPARE SPECIFICATIONS
 // ============================================
 
+// How each spec is compared. A row with `better` gets a winner:
+//   number(gpu)  -> the value used to compare
+//   better       -> "higher" or "lower" wins
+//   group        -> which part of the verdict it counts towards
+//   comparable   -> optional; when it returns false the row isn't scored
+// Rows without `better` are shown for information only.
+
+const MEMORY_TYPE_RANK = {
+    DDR3: 1, GDDR5: 2, GDDR5X: 3, GDDR6: 4, GDDR6X: 5, GDDR7: 6
+};
+
+// "2.41 GHz" -> 2.41, "2410 MHz" -> 2.41
+function clockGhz(text) {
+    const n = parseCompareNumber(text);
+    return /mhz/i.test(String(text || "")) ? n / 1000 : n;
+}
+
+// "PCIe 5.0 x16" -> 516 (generation first, then lanes)
+function pcieScore(text) {
+    const match = String(text || "").match(/(\d+)(?:\.\d+)?\s*x(\d+)/i);
+    return match ? Number(match[1]) * 100 + Number(match[2]) : NaN;
+}
+
 const COMPARE_ROWS = [
-
-    {
-        category: "Overview"
-    },
-
+    { category: "Overview" },
     {
         label: "Launch Price",
-
-        value:
-            (gpu) =>
-                getLaunchPrice(gpu),
-
-        number:
-            (gpu) =>
-                Number(
-                    gpu.launch_price_usd
-                ),
-
-        better: "lower"
+        value: (gpu) => getLaunchPrice(gpu),
+        number: (gpu) => (gpu.launch_price_usd == null ? NaN : Number(gpu.launch_price_usd)),
+        better: "lower",
+        group: "value",
+        note: "Cheaper"
     },
-
     {
         label: "Release Date",
-
-        value:
-            (gpu) =>
-                gpu.release_date ||
-                "--"
+        value: (gpu) => gpu.release_date || "--",
+        number: (gpu) => getReleaseTimestamp(gpu),
+        better: "higher",
+        group: "info",
+        note: "Newer"
     },
+    { label: "Series", value: (gpu) => gpu.series || "--" },
 
-    {
-        label: "Series",
-
-        value:
-            (gpu) =>
-                gpu.series ||
-                "--"
-    },
-
-
-    {
-        category: "Performance"
-    },
-
-    {
-        label: "Architecture",
-
-        value:
-            (gpu) =>
-                gpu.architecture ||
-                "--"
-    },
-
+    { category: "Performance" },
+    { label: "Architecture", value: (gpu) => gpu.architecture || "--" },
     {
         label: "Core Count",
-
-        value:
-            (gpu) =>
-                formatCompareNumber(
-                    gpu.core_count
-                )
+        value: (gpu) => formatCompareNumber(gpu.core_count),
+        number: (gpu) => Number(gpu.core_count),
+        better: "higher",
+        group: "performance",
+        // CUDA cores, Stream Processors and Xe cores aren't the same size.
+        comparable: (a, b) => a.core_type === b.core_type,
+        notComparable: "Different core types: counts aren't directly comparable"
     },
-
-    {
-        label: "Core Type",
-
-        value:
-            (gpu) =>
-                gpu.core_type ||
-                "--"
-    },
-
+    { label: "Core Type", value: (gpu) => gpu.core_type || "--" },
     {
         label: "Base Clock",
-
-        value:
-            (gpu) =>
-                gpu.base_clock ||
-                "--"
+        value: (gpu) => gpu.base_clock || "--",
+        number: (gpu) => clockGhz(gpu.base_clock),
+        better: "higher",
+        group: "performance",
+        // Clock speeds mean different things on different designs.
+        comparable: (a, b) => a.core_type === b.core_type,
+        notComparable: "Different core designs: clock speeds aren't directly comparable"
     },
-
     {
         label: "Boost Clock",
-
-        value:
-            (gpu) =>
-                gpu.boost_clock ||
-                "--"
+        value: (gpu) => gpu.boost_clock || "--",
+        number: (gpu) => clockGhz(gpu.boost_clock),
+        better: "higher",
+        group: "performance",
+        // Clock speeds mean different things on different designs.
+        comparable: (a, b) => a.core_type === b.core_type,
+        notComparable: "Different core designs: clock speeds aren't directly comparable"
     },
 
-
-    {
-        category: "Memory"
-    },
-
+    { category: "Memory" },
     {
         label: "VRAM",
-
-        value:
-            (gpu) =>
-                gpu.vram ||
-                "--",
-
-        number:
-            (gpu) =>
-                parseVramGb(
-                    gpu.vram
-                ),
-
-        better: "higher"
+        value: (gpu) => gpu.vram || "--",
+        number: (gpu) => parseVramGb(gpu.vram),
+        better: "higher",
+        group: "performance"
     },
-
     {
         label: "Memory Type",
-
-        value:
-            (gpu) =>
-                gpu.memory_type ||
-                "--"
+        value: (gpu) => gpu.memory_type || "--",
+        number: (gpu) => MEMORY_TYPE_RANK[gpu.memory_type] ?? NaN,
+        better: "higher",
+        group: "performance"
     },
-
     {
         label: "Memory Bus",
-
-        value:
-            (gpu) =>
-                gpu.memory_bus ||
-                "--",
-
-        number:
-            (gpu) =>
-                parseCompareNumber(
-                    gpu.memory_bus
-                ),
-
-        better: "higher"
+        value: (gpu) => gpu.memory_bus || "--",
+        number: (gpu) => parseCompareNumber(gpu.memory_bus),
+        better: "higher",
+        group: "performance"
     },
-
     {
         label: "Memory Bandwidth",
-
-        value:
-            (gpu) =>
-                gpu.memory_bandwidth ||
-                (
-                    gpu.memory_bandwidth_gbps
-                        ? `${gpu.memory_bandwidth_gbps} GB/s`
-                        : "--"
-                ),
-
-        number:
-            (gpu) =>
-                Number(
-                    gpu.memory_bandwidth_gbps
-                ),
-
-        better: "higher"
+        value: (gpu) =>
+            gpu.memory_bandwidth ||
+            (gpu.memory_bandwidth_gbps ? `${gpu.memory_bandwidth_gbps} GB/s` : "--"),
+        number: (gpu) => Number(gpu.memory_bandwidth_gbps),
+        better: "higher",
+        group: "performance"
     },
 
-
-    {
-        category: "Power & Platform"
-    },
-
+    { category: "Power & Platform" },
     {
         label: "Power",
-
-        value:
-            (gpu) =>
-                gpu.power ||
-                "--"
+        value: (gpu) => gpu.power || "--",
+        number: (gpu) => parseCompareNumber(gpu.power),
+        better: "lower",
+        group: "efficiency",
+        note: "Less power"
     },
-
     {
         label: "Recommended PSU",
-
-        value:
-            (gpu) =>
-                gpu.recommended_psu ||
-                "--"
+        value: (gpu) => gpu.recommended_psu || "--",
+        number: (gpu) => parseCompareNumber(gpu.recommended_psu),
+        better: "lower",
+        group: "efficiency",
+        note: "Smaller PSU"
     },
-
     {
         label: "PCIe Interface",
-
-        value:
-            (gpu) =>
-                gpu.pcie_interface ||
-                "--"
+        value: (gpu) => gpu.pcie_interface || "--",
+        number: (gpu) => pcieScore(gpu.pcie_interface),
+        better: "higher",
+        group: "platform"
     },
-
     {
         label: "Process Node",
-
-        value:
-            (gpu) =>
-                gpu.process_node_nm
-                    ? `${gpu.process_node_nm} nm`
-                    : "--"
+        value: (gpu) => (gpu.process_node_nm ? `${gpu.process_node_nm} nm` : "--"),
+        number: (gpu) => Number(gpu.process_node_nm),
+        better: "lower",
+        group: "efficiency",
+        note: "Smaller node"
     }
 ];
 
 
+// "A", "B", "tie", "na" (can't be compared) or null (information row)
+function compareRowWinner(row, a, b) {
+    if (!row.better || !row.number) return null;
+    if (row.comparable && !row.comparable(a, b)) return "na";
+
+    const numberA = row.number(a);
+    const numberB = row.number(b);
+
+    if (!Number.isFinite(numberA) || !Number.isFinite(numberB)) return "na";
+    if (numberA === numberB) return "tie";
+
+    const aWins = row.better === "higher" ? numberA > numberB : numberA < numberB;
+    return aWins ? "A" : "B";
+}
+
+
 function renderComparisonTable() {
-
-    const results =
-        $("compareResults");
-
-    const body =
-        $("compareTableBody");
+    const results = $("compareResults");
+    const body = $("compareTableBody");
 
     if (!results || !body) {
         return;
     }
 
-    if (
-        !compareGpuA ||
-        !compareGpuB
-    ) {
-
+    if (!compareGpuA || !compareGpuB) {
         results.hidden = true;
-
         return;
     }
 
-
     results.hidden = false;
+    setText("compareTableGpuA", compareGpuA.model || "GPU 1");
+    setText("compareTableGpuB", compareGpuB.model || "GPU 2");
 
+    renderCompareVerdict(compareGpuA, compareGpuB);
 
-    setText(
-        "compareTableGpuA",
-        compareGpuA.model ||
-        "GPU 1"
-    );
-
-    setText(
-        "compareTableGpuB",
-        compareGpuB.model ||
-        "GPU 2"
-    );
-
-
-    const differencesOnly =
-        $("differencesOnly")
-            ?.checked;
-
-
+    const differencesOnly = $("differencesOnly")?.checked;
     body.innerHTML = "";
 
+    COMPARE_ROWS.forEach((row) => {
+        const tr = document.createElement("tr");
 
-    COMPARE_ROWS.forEach(
-        (row) => {
-
-
-            if (row.category) {
-
-                const tr =
-                    document.createElement(
-                        "tr"
-                    );
-
-                tr.className =
-                    "compare-category";
-
-                tr.innerHTML = `
-                    <td colspan="3">
-                        ${escapeHTML(
-                            row.category
-                        )}
-                    </td>
-                `;
-
-                body.appendChild(
-                    tr
-                );
-
-                return;
-            }
-
-
-            const valueA =
-                row.value(
-                    compareGpuA
-                );
-
-
-            const valueB =
-                row.value(
-                    compareGpuB
-                );
-
-
-            if (
-                differencesOnly &&
-                String(valueA) ===
-                String(valueB)
-            ) {
-                return;
-            }
-
-
-            let classA =
-                "compare-same";
-
-            let classB =
-                "compare-same";
-
-
-            if (
-                row.number &&
-                row.better
-            ) {
-
-                const numberA =
-                    row.number(
-                        compareGpuA
-                    );
-
-                const numberB =
-                    row.number(
-                        compareGpuB
-                    );
-
-
-                if (
-                    Number.isFinite(numberA) &&
-                    Number.isFinite(numberB) &&
-                    numberA !== numberB
-                ) {
-
-                    const aWins =
-                        row.better === "higher"
-                            ? numberA > numberB
-                            : numberA < numberB;
-
-
-                    classA =
-                        aWins
-                            ? "compare-better"
-                            : "compare-worse";
-
-
-                    classB =
-                        aWins
-                            ? "compare-worse"
-                            : "compare-better";
-                }
-            }
-
-
-            const tr =
-                document.createElement(
-                    "tr"
-                );
-
-
-            tr.innerHTML = `
-
-                <td>
-                    ${escapeHTML(
-                        row.label
-                    )}
-                </td>
-
-                <td class="${classA}">
-                    ${escapeHTML(
-                        valueA
-                    )}
-                </td>
-
-                <td class="${classB}">
-                    ${escapeHTML(
-                        valueB
-                    )}
-                </td>
-
-            `;
-
-
-            body.appendChild(
-                tr
-            );
+        if (row.category) {
+            tr.className = "compare-category";
+            const cell = tr.insertCell();
+            cell.colSpan = 3;
+            cell.textContent = row.category;
+            body.appendChild(tr);
+            return;
         }
-    );
+
+        const valueA = row.value(compareGpuA);
+        const valueB = row.value(compareGpuB);
+
+        if (differencesOnly && String(valueA) === String(valueB)) {
+            return;
+        }
+
+        const winner = compareRowWinner(row, compareGpuA, compareGpuB);
+        const classFor = (side) => {
+            if (winner === "A" || winner === "B") {
+                return winner === side ? "compare-better" : "compare-worse";
+            }
+            return winner === "na" ? "compare-na" : "compare-same";
+        };
+
+        const label = tr.insertCell();
+        label.textContent = row.label;
+
+        for (const [side, value] of [["A", valueA], ["B", valueB]]) {
+            const cell = tr.insertCell();
+            cell.className = classFor(side);
+            cell.textContent = value;
+
+            if (winner === side) {
+                const badge = document.createElement("span");
+                badge.className = "compare-win-badge";
+                badge.textContent = row.note || (row.better === "lower" ? "Lower" : "Better");
+                cell.append(" ", badge);
+            }
+        }
+
+        if (winner === "na" && row.notComparable) {
+            tr.title = row.notComparable;
+        }
+
+        body.appendChild(tr);
+    });
+}
+
+
+// ---------- overall verdict ----------
+
+function compareTally(a, b) {
+    const groups = {};
+
+    for (const row of COMPARE_ROWS) {
+        if (!row.group || row.group === "info") continue;
+
+        const winner = compareRowWinner(row, a, b);
+        if (winner !== "A" && winner !== "B" && winner !== "tie") continue;
+
+        const g = (groups[row.group] ??= { A: 0, B: 0, tie: 0, rows: [] });
+        g[winner] += 1;
+        g.rows.push({ label: row.label, winner });
+    }
+
+    const total = { A: 0, B: 0, tie: 0 };
+    for (const g of Object.values(groups)) {
+        total.A += g.A;
+        total.B += g.B;
+        total.tie += g.tie;
+    }
+
+    return { groups, total };
+}
+
+function renderCompareVerdict(a, b) {
+    const box = $("compareVerdict");
+    if (!box) return;
+
+    const nameA = a.model || "GPU 1";
+    const nameB = b.model || "GPU 2";
+    const { groups, total } = compareTally(a, b);
+    const perf = groups.performance || { A: 0, B: 0, tie: 0 };
+
+    // Headline: who has the stronger performance specs.
+    const counted = perf.A + perf.B + perf.tie;
+    let headline;
+    let subline = "";
+    if (perf.A === perf.B) {
+        headline = "These two are evenly matched on performance specs";
+        if (counted) subline = `Each is ahead on ${perf.A}, and ${perf.tie} of ${counted} performance specs are equal.`;
+    } else {
+        const aLeads = perf.A > perf.B;
+        headline = `${aLeads ? nameA : nameB} has the stronger specs`;
+        subline = `Ahead on ${aLeads ? perf.A : perf.B}, behind on ${aLeads ? perf.B : perf.A}, equal on ${perf.tie} of ${counted} performance specs (${a.core_type === b.core_type ? "cores, clocks and memory" : "memory only, since the core designs differ"}).`;
+    }
+
+    // Supporting facts, each only when it says something.
+    const facts = [];
+    const priceA = Number(a.launch_price_usd);
+    const priceB = Number(b.launch_price_usd);
+    const hasPrices = a.launch_price_usd != null && b.launch_price_usd != null;
+
+    if (hasPrices && priceA !== priceB) {
+        const cheaper = priceA < priceB ? nameA : nameB;
+        facts.push(["Price", `${cheaper} launched $${Math.abs(priceA - priceB).toLocaleString()} cheaper`]);
+    } else if (hasPrices) {
+        facts.push(["Price", `Same launch price ($${priceA.toLocaleString()})`]);
+    }
+
+    const bwA = Number(a.memory_bandwidth_gbps);
+    const bwB = Number(b.memory_bandwidth_gbps);
+    if (bwA && bwB && bwA !== bwB) {
+        const faster = bwA > bwB ? nameA : nameB;
+        const pct = Math.round((Math.max(bwA, bwB) / Math.min(bwA, bwB) - 1) * 100);
+        facts.push(["Memory", `${faster} has ${pct}% more memory bandwidth`]);
+    }
+
+    if (hasPrices && priceA > 0 && priceB > 0 && bwA && bwB) {
+        const perDollarA = bwA / priceA;
+        const perDollarB = bwB / priceB;
+        if (Math.abs(perDollarA - perDollarB) / Math.max(perDollarA, perDollarB) > 0.05) {
+            facts.push(["Value", `${perDollarA > perDollarB ? nameA : nameB} gives more bandwidth per dollar`]);
+        }
+    }
+
+    const powerA = parseCompareNumber(a.power);
+    const powerB = parseCompareNumber(b.power);
+    if (Number.isFinite(powerA) && Number.isFinite(powerB) && powerA !== powerB) {
+        const lighter = powerA < powerB ? nameA : nameB;
+        facts.push(["Power", `${lighter} draws ${Math.abs(powerA - powerB)}W less`]);
+    }
+
+    if (a.core_type && b.core_type && a.core_type !== b.core_type) {
+        facts.push(["Note", `${a.core_type} and ${b.core_type} differ in design, so core counts and clock speeds aren't scored between them`]);
+    }
+
+    // Build with DOM APIs: model names come from the API.
+    box.replaceChildren();
+
+    const heading = document.createElement("h3");
+    heading.textContent = headline;
+
+    const score = document.createElement("div");
+    score.className = "compare-verdict-score";
+    for (const [name, wins, side] of [[nameA, total.A, "A"], [nameB, total.B, "B"]]) {
+        const pill = document.createElement("span");
+        const leading = total[side] > total[side === "A" ? "B" : "A"];
+        pill.className = "compare-verdict-pill" + (leading ? " is-leading" : "");
+        pill.textContent = `${name}: ${wins} win${wins === 1 ? "" : "s"}`;
+        score.append(pill);
+    }
+    if (total.tie) {
+        const ties = document.createElement("span");
+        ties.className = "compare-verdict-pill";
+        ties.textContent = `${total.tie} tied`;
+        score.append(ties);
+    }
+
+    const list = document.createElement("ul");
+    for (const [topic, text] of facts) {
+        const item = document.createElement("li");
+        const strong = document.createElement("strong");
+        strong.textContent = `${topic}: `;
+        item.append(strong, text);
+        list.append(item);
+    }
+
+    const foot = document.createElement("p");
+    foot.className = "compare-verdict-foot";
+    foot.textContent =
+        "Based on listed specifications, not benchmarks. Real-world performance depends on the game or app, drivers and resolution.";
+
+    box.append(heading);
+    if (subline) {
+        const sub = document.createElement("p");
+        sub.className = "compare-verdict-sub";
+        sub.textContent = subline;
+        box.append(sub);
+    }
+    box.append(score);
+    if (facts.length) box.append(list);
+    box.append(foot);
 }
 
 

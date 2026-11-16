@@ -4894,3 +4894,93 @@ html.auth-checking .app {
 .gpu-image-admin-status.is-error {
     color: #a12626;
 }
+
+
+/* ----- compare: verdict and winner badges ----- */
+
+.compare-verdict {
+    margin: 0 0 18px;
+    padding: 18px 20px;
+
+    border: 1px solid #cfe4ff;
+    border-radius: 14px;
+    background: linear-gradient(180deg, #f3f9ff 0%, #ffffff 100%);
+}
+
+.compare-verdict:empty {
+    display: none;
+}
+
+.compare-verdict h3 {
+    margin-bottom: 10px;
+    font-size: 17px;
+    line-height: 1.35;
+}
+
+.compare-verdict-score {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 12px;
+}
+
+.compare-verdict-pill {
+    padding: 5px 11px;
+
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    background: var(--white);
+    color: var(--text-light);
+
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.compare-verdict-pill.is-leading {
+    border-color: #a6dfbd;
+    background: #effaf3;
+    color: #17663a;
+}
+
+.compare-verdict ul {
+    display: grid;
+    gap: 6px;
+    margin: 0 0 12px;
+    padding-left: 18px;
+
+    font-size: 13px;
+    line-height: 1.45;
+}
+
+.compare-verdict-foot {
+    color: var(--text-light);
+    font-size: 11px;
+    line-height: 1.5;
+}
+
+.compare-win-badge {
+    display: inline-block;
+    margin-left: 6px;
+    padding: 1px 7px;
+
+    border-radius: 999px;
+    background: #d7f3e2;
+    color: #17663a;
+
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    vertical-align: 1px;
+}
+
+.compare-na {
+    color: var(--text-light);
+    font-style: italic;
+}
+
+.compare-verdict-sub {
+    margin: -4px 0 12px;
+    color: var(--text-light);
+    font-size: 13px;
+    line-height: 1.45;
+}
