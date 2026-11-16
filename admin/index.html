@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex, nofollow">
+    <meta name="referrer" content="no-referrer">
+    <title>Admin - GPU Finder</title>
+    <link rel="stylesheet" href="/css/admin.css">
+</head>
+<body class="admin-checking">
+
+<!-- Shown until the account check finishes, and to non-admins. -->
+<main class="admin-gate" id="adminGate">
+    <div class="admin-gate-card">
+        <span class="admin-mark" aria-hidden="true">⚙</span>
+        <h1 id="gateTitle">Checking access...</h1>
+        <p id="gateText">One moment.</p>
+        <a class="admin-btn" id="gateLink" href="/index.html" hidden>Back to GPU Finder</a>
+    </div>
+</main>
+
+<div class="admin-app" id="adminApp" hidden>
+    <header class="admin-top">
+        <div class="admin-brand">
+            <span class="admin-mark" aria-hidden="true">⚙</span>
+            <div>
+                <strong>GPU Finder Admin</strong>
+                <small>Catalog management</small>
+            </div>
+        </div>
+        <div class="admin-user">
+            <span id="adminEmail"></span>
+            <a class="admin-btn is-ghost" href="/index.html">View site</a>
+            <button class="admin-btn is-ghost" type="button" id="signOut">Sign out</button>
+        </div>
+    </header>
+
+    <main class="admin-main">
+        <section class="admin-stats" aria-label="Catalog summary">
+            <div class="admin-stat"><span id="statTotal">-</span><small>GPUs</small></div>
+            <div class="admin-stat"><span id="statPictures">-</span><small>with a picture</small></div>
+            <div class="admin-stat"><span id="statNoPicture">-</span><small>missing a picture</small></div>
+            <div class="admin-stat"><span id="statBrands">-</span><small>brands</small></div>
+        </section>
+
+        <section class="admin-panel">
+            <div class="admin-toolbar">
+                <h1>GPUs</h1>
+                <input type="search" id="search" placeholder="Search model, series, architecture..." aria-label="Search GPUs" autocomplete="off">
+                <label class="admin-check">
+                    <input type="checkbox" id="onlyMissing"> Missing picture only
+                </label>
+                <button class="admin-btn" type="button" id="addGpu">+ Add GPU</button>
+            </div>
+
+            <p class="admin-notice" id="notice" role="status" aria-live="polite" hidden></p>
+
+            <div class="admin-table-wrap">
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th scope="col">ID</th>
+                            <th scope="col">Picture</th>
+                            <th scope="col">Model</th>
+                            <th scope="col">Series</th>
+                            <th scope="col">VRAM</th>
+                            <th scope="col">Released</th>
+                            <th scope="col">Price</th>
+                            <th scope="col"><span class="visually-hidden">Actions</span></th>
+                        </tr>
+                    </thead>
+                    <tbody id="gpuRows">
+                        <tr><td colspan="8" class="admin-empty">Loading GPUs...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+</div>
+
+<!-- Add / edit form -->
+<dialog class="admin-dialog" id="gpuDialog" aria-labelledby="gpuDialogTitle">
+    <form id="gpuForm" method="dialog" novalidate>
+        <div class="admin-dialog-head">
+            <h2 id="gpuDialogTitle">Add GPU</h2>
+            <button class="admin-icon-btn" type="button" data-close aria-label="Close">×</button>
+        </div>
+        <p class="admin-form-error" id="formError" role="alert" hidden></p>
+        <div class="admin-form-grid" id="formFields"></div>
+        <div class="admin-dialog-foot">
+            <button class="admin-btn is-ghost" type="button" data-close>Cancel</button>
+            <button class="admin-btn" type="submit" id="saveGpu">Save</button>
+        </div>
+    </form>
+</dialog>
+
+<!-- Confirm delete -->
+<dialog class="admin-dialog is-small" id="confirmDialog" aria-labelledby="confirmTitle">
+    <div class="admin-dialog-head">
+        <h2 id="confirmTitle">Delete GPU?</h2>
+    </div>
+    <p class="admin-confirm-text" id="confirmText"></p>
+    <div class="admin-dialog-foot">
+        <button class="admin-btn is-ghost" type="button" id="confirmNo">Cancel</button>
+        <button class="admin-btn is-danger" type="button" id="confirmYes">Delete</button>
+    </div>
+</dialog>
+
+<input type="file" id="pictureInput" accept="image/png,image/jpeg,image/webp" class="visually-hidden" tabindex="-1">
+
+<script src="/js/admin.js"></script>
+</body>
+</html>

@@ -75,6 +75,7 @@ function setBusy(form, busy, busyLabel) {
 // website (?next=https://evil.example would otherwise be an open redirect).
 function safeNext() {
     const next = new URLSearchParams(location.search).get("next") || "";
+    if (next === "admin/") return "admin/";
     return /^[a-z0-9-]+\.html(\?[^#\s]*)?$/i.test(next) ? next : "index.html";
 }
 
