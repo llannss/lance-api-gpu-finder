@@ -280,7 +280,7 @@ function renderBrowseGrid(gpus) {
                     alt="${escapeHTML(`${brand} ${model}`)}"
                     class="gpu-image"
                     loading="lazy"
-                    onerror="this.style.display='none'"
+                    data-hide-on-error
                 >
             </div>
 
@@ -334,7 +334,7 @@ function openDetailsSidebar(gpu) {
                 <img
                     src="${escapeHTML(imagePath)}"
                     alt="${escapeHTML(gpu.model || "GPU")}"
-                    onerror="this.style.display='none'"
+                    data-hide-on-error
                 >
             </div>
 

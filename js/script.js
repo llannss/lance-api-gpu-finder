@@ -3,9 +3,10 @@
 // Shared API, homepage, modal, chat, and compare logic
 // ============================================
 
-const API_URL = "https://lance-api-murex.vercel.app";
-const API_KEY = "apinilance";
-const CHAT_API_URL = `${API_URL}/chat`;
+// The site's vercel.json rewrites /api/* to the GPU Finder API, so the
+// browser treats the API as the same site. The login lives in an HttpOnly
+// cookie the API sets; page scripts never see the token.
+const API_URL = "/api";
 
 const DASHBOARD_REFRESH_MS = 60_000;
 const FAVORITES_KEY = "gpuFinderFavorites";
@@ -20,19 +21,194 @@ let compareGpuB = null;
 
 const $ = (id) => document.getElementById(id);
 
+// Hidden until the session check finishes (see the START section), so a
+// signed-out visitor never sees an empty page flash before the redirect.
+document.documentElement.classList.add("auth-checking");
+
+// Hide product images that fail to load. One listener replaces inline
+// onerror="" attributes, which the Content-Security-Policy blocks.
+document.addEventListener(
+    "error",
+    (event) => {
+        if (event.target instanceof HTMLImageElement && event.target.hasAttribute("data-hide-on-error")) {
+            event.target.style.display = "none";
+        }
+    },
+    true
+);
+
 
 // ============================================
 // API
 // ============================================
 
-async function fetchGPUs() {
-    const response = await fetch(`${API_URL}/gpus`, {
-        method: "GET",
-        cache: "no-store",
+// Every API call goes through here. It sends the session cookie, adds the
+// header the API requires on cookie-authenticated writes, and sends the
+// visitor to the sign-in page when the session is missing or expired.
+async function apiFetch(path, options = {}) {
+    const response = await fetch(`${API_URL}${path}`, {
+        credentials: "same-origin",
+        ...options,
         headers: {
             Accept: "application/json",
-            "x-api-key": API_KEY
+            "X-Requested-With": "fetch",
+            ...(options.headers || {})
         }
+    });
+
+    if (response.status === 401) {
+        redirectToSignIn();
+        throw new Error("Not signed in.");
+    }
+
+    return response;
+}
+
+let redirectingToSignIn = false;
+
+function redirectToSignIn() {
+    if (redirectingToSignIn) return;
+    redirectingToSignIn = true;
+
+    const here =
+        location.pathname.split("/").pop() +
+        location.search;
+
+    location.replace(
+        `signin.html?next=${encodeURIComponent(here || "index.html")}`
+    );
+}
+
+let currentAccount = null;
+// Resolves to the signed-in account (or null) once /auth/me has answered.
+let accountReady = Promise.resolve(null);
+
+async function loadAccount() {
+    const response = await apiFetch("/auth/me", { cache: "no-store" });
+
+    if (!response.ok) {
+        throw new Error(`Account request failed (${response.status})`);
+    }
+
+    currentAccount = await response.json();
+    renderAccountBox(currentAccount);
+    return currentAccount;
+}
+
+function renderAccountBox(account) {
+    const sidebar = document.querySelector(".sidebar");
+
+    if (!sidebar || $("accountBox")) return;
+
+    const box = document.createElement("div");
+    box.className = "account-box";
+    box.id = "accountBox";
+
+    const avatar = document.createElement("span");
+    avatar.className = "account-avatar";
+    avatar.setAttribute("aria-hidden", "true");
+    avatar.textContent = (account.email || "?").charAt(0).toUpperCase();
+
+    const info = document.createElement("div");
+    info.className = "account-info";
+
+    const email = document.createElement("strong");
+    email.textContent = account.email;
+    email.title = account.email;
+
+    const role = document.createElement("small");
+    role.textContent = account.role === "admin" ? "Admin" : "Member";
+
+    info.append(email, role);
+
+    const signOut = document.createElement("button");
+    signOut.type = "button";
+    signOut.className = "account-signout";
+    signOut.textContent = "Sign out";
+    signOut.addEventListener("click", signOutHere);
+
+    const signOutAll = document.createElement("button");
+    signOutAll.type = "button";
+    signOutAll.className = "account-signout-all";
+    signOutAll.textContent = "Sign out everywhere";
+    signOutAll.addEventListener("click", signOutEverywhere);
+
+    box.append(avatar, info, signOut, signOutAll);
+
+    const promo = sidebar.querySelector(".sidebar-promo");
+    sidebar.insertBefore(box, promo || null);
+
+    // Phones hide the sidebar, so the top bar gets a compact sign-out too.
+    const topbar = document.querySelector(".topbar");
+
+    if (topbar) {
+        const mobile = document.createElement("button");
+        mobile.type = "button";
+        mobile.className = "account-topbar";
+        mobile.textContent = "Sign out";
+        mobile.title = `Signed in as ${account.email}`;
+        mobile.addEventListener("click", signOutHere);
+        topbar.appendChild(mobile);
+    }
+}
+
+async function signOutHere() {
+    try {
+        await fetch(`${API_URL}/auth/logout`, {
+            method: "POST",
+            credentials: "same-origin",
+            headers: { "X-Requested-With": "fetch" }
+        });
+    } finally {
+        location.replace("signin.html");
+    }
+}
+
+async function signOutEverywhere() {
+    if (!confirm("Sign out of GPU Finder on every device?")) return;
+
+    try {
+        await apiFetch("/auth/logout-all", { method: "POST" });
+    } finally {
+        location.replace("signin.html");
+    }
+}
+
+// Every page's setup code (global search, dashboard, browse, compare,
+// analytics, rankings, details) asks for the GPU list on load. Share one
+// in-flight/recent request between them instead of hitting the API once
+// per caller. Responses younger than GPU_CACHE_MS are reused.
+const GPU_CACHE_MS = 30_000;
+let gpuRequest = null;
+let gpuRequestTime = 0;
+
+async function fetchGPUs({ force = false } = {}) {
+    const isFresh =
+        gpuRequest &&
+        Date.now() - gpuRequestTime < GPU_CACHE_MS;
+
+    if (force || !isFresh) {
+        gpuRequestTime = Date.now();
+        gpuRequest = requestGPUs().catch((error) => {
+            // Don't cache failures, so Retry actually retries.
+            gpuRequest = null;
+            throw error;
+        });
+    }
+
+    // Copy so a caller sorting/filtering in place can't affect others.
+    return [...(await gpuRequest)];
+}
+
+// Call after changing a GPU so the next fetchGPUs() reads fresh data.
+function invalidateGpuCache() {
+    gpuRequest = null;
+}
+
+async function requestGPUs() {
+    const response = await apiFetch("/gpus", {
+        method: "GET",
+        cache: "no-store"
     });
 
     const data = await response.json().catch(() => ({}));
@@ -333,7 +509,19 @@ function createFeaturedGpuCard(gpu, badge) {
 // SHARED GPU HELPERS
 // ============================================
 
+// Pictures uploaded by admins live in Supabase Storage. Only URLs from that
+// bucket are used; anything else falls back to the bundled local image.
+const GPU_IMAGE_BUCKET =
+    "https://irchyhaoodwsumlfsbbc.supabase.co/storage/v1/object/public/gpu-images/";
+
 function getImageFile(gpu) {
+
+    if (
+        typeof gpu.image_url === "string" &&
+        gpu.image_url.startsWith(GPU_IMAGE_BUCKET)
+    ) {
+        return gpu.image_url;
+    }
 
     const shortModel =
         String(gpu.model || "gpu")
@@ -1476,8 +1664,8 @@ function setupGeminiChat() {
             try {
 
                 const response =
-                    await fetch(
-                        CHAT_API_URL,
+                    await apiFetch(
+                        "/chat",
                         {
                             method: "POST",
 
@@ -1486,12 +1674,14 @@ function setupGeminiChat() {
                                     "application/json"
                             },
 
+                            // Odd count so the window starts on a
+                            // user turn and ends on this message.
                             body:
                                 JSON.stringify({
                                     message,
                                     history:
                                         conversation.slice(
-                                            -10
+                                            -9
                                         )
                                 })
                         }
@@ -1505,11 +1695,13 @@ function setupGeminiChat() {
                         );
 
                 if (!response.ok) {
-                    throw new Error(
+                    const chatError = new Error(
                         data.detail ||
                         data.error ||
                         `Chat request failed (${response.status})`
                     );
+                    chatError.status = response.status;
+                    throw chatError;
                 }
 
                 const reply =
@@ -1524,7 +1716,8 @@ function setupGeminiChat() {
 
                 conversation.push({
                     role: "model",
-                    text: reply
+                    // Server caps history items at 2000 chars.
+                    text: reply.slice(0, 2000)
                 });
 
             } catch (error) {
@@ -1534,9 +1727,16 @@ function setupGeminiChat() {
                     error
                 );
 
+                // Drop the unanswered turn so history keeps
+                // alternating user/model (the server rejects
+                // two user turns in a row).
+                conversation.pop();
+
                 addChatMessage(
                     chatMessages,
-                    "The assistant is unavailable right now.",
+                    error.status === 429
+                        ? error.message
+                        : "The assistant is unavailable right now.",
                     "error"
                 );
 
@@ -1665,7 +1865,7 @@ function openGpuDetails(gpu) {
                     alt="${escapeHTML(
                         gpu.model || "GPU"
                     )}"
-                    onerror="this.style.display='none'"
+                    data-hide-on-error
                 >
 
             </div>
@@ -4644,6 +4844,13 @@ async function setupGpuDetailsPage() {
             gpu
         );
 
+        // Admins get picture controls. The API checks the role again.
+        accountReady.then((account) => {
+            if (account?.role === "admin") {
+                setupGpuImageAdmin(gpu);
+            }
+        });
+
 
     } catch (error) {
 
@@ -4657,6 +4864,138 @@ async function setupGpuDetailsPage() {
             "Unable to load this GPU."
         );
     }
+}
+
+// ---------- admin: GPU picture upload ----------
+
+const IMAGE_TYPES = ["image/png", "image/jpeg", "image/webp"];
+const IMAGE_MAX_BYTES = 4 * 1024 * 1024;   // matches the API (Vercel body limit)
+
+function setupGpuImageAdmin(gpu) {
+    const frame = document.querySelector(".gpu-page-image");
+
+    if (!frame || frame.querySelector(".gpu-image-admin")) return;
+
+    const panel = document.createElement("div");
+    panel.className = "gpu-image-admin";
+
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept = IMAGE_TYPES.join(",");
+    input.id = "gpuImageInput";
+    input.className = "visually-hidden";
+
+    const change = document.createElement("label");
+    change.htmlFor = input.id;
+    change.className = "gpu-image-admin-btn";
+    change.textContent = gpu.image_url ? "Change picture" : "Upload picture";
+
+    const remove = document.createElement("button");
+    remove.type = "button";
+    remove.className = "gpu-image-admin-btn is-secondary";
+    remove.textContent = "Remove picture";
+    remove.hidden = !gpu.image_url;
+
+    const status = document.createElement("p");
+    status.className = "gpu-image-admin-status";
+    status.setAttribute("role", "status");
+
+    panel.append(input, change, remove, status);
+    frame.appendChild(panel);
+
+    const showPicture = (updated) => {
+        gpu.image_url = updated.image_url;
+        let img = frame.querySelector("img");
+
+        if (!img) {
+            img = document.createElement("img");
+            img.setAttribute("data-hide-on-error", "");
+            frame.prepend(img);
+        }
+
+        img.alt = gpu.model || "GPU";
+        img.style.display = "";
+        img.src = getImageFile(gpu);
+        change.textContent = gpu.image_url ? "Change picture" : "Upload picture";
+        remove.hidden = !gpu.image_url;
+    };
+
+    const setBusy = (busy, text = "") => {
+        change.classList.toggle("is-busy", busy);
+        input.disabled = busy;
+        remove.disabled = busy;
+        status.textContent = text;
+        status.classList.remove("is-error");
+    };
+
+    const fail = (text) => {
+        setBusy(false);
+        status.textContent = text;
+        status.classList.add("is-error");
+    };
+
+    input.addEventListener("change", async () => {
+        const file = input.files[0];
+        input.value = "";
+        if (!file) return;
+
+        if (!IMAGE_TYPES.includes(file.type)) {
+            fail("Choose a PNG, JPEG or WebP picture.");
+            return;
+        }
+
+        if (file.size > IMAGE_MAX_BYTES) {
+            fail("The picture must be 4 MB or smaller.");
+            return;
+        }
+
+        setBusy(true, "Uploading...");
+
+        try {
+            const body = new FormData();
+            body.append("file", file);
+
+            // No Content-Type: the browser adds the multipart boundary.
+            const response = await apiFetch(`/gpus/${encodeURIComponent(gpu.id)}/image`, {
+                method: "POST",
+                body
+            });
+            const data = await response.json().catch(() => ({}));
+
+            if (!response.ok) {
+                fail(typeof data.detail === "string" ? data.detail : "Upload failed.");
+                return;
+            }
+
+            showPicture(data);
+            invalidateGpuCache();
+            setBusy(false, "Picture saved.");
+        } catch {
+            fail("Upload failed. Check your connection.");
+        }
+    });
+
+    remove.addEventListener("click", async () => {
+        setBusy(true, "Removing...");
+
+        try {
+            const response = await apiFetch(`/gpus/${encodeURIComponent(gpu.id)}/image`, {
+                method: "DELETE"
+            });
+            const data = await response.json().catch(() => ({}));
+
+            if (!response.ok) {
+                fail(typeof data.detail === "string" ? data.detail : "Couldn't remove the picture.");
+                return;
+            }
+
+            showPicture(data);
+            invalidateGpuCache();
+            setBusy(false, "Picture removed. The built-in image is shown.");
+        } catch {
+            fail("Couldn't remove the picture. Check your connection.");
+        }
+    });
 }
 
 function renderGpuDetailsPage(gpu) {
@@ -4705,9 +5044,7 @@ function renderGpuDetailsPage(gpu) {
                         "GPU"
                     )}"
 
-                    onerror="
-                        this.style.display='none'
-                    "
+                    data-hide-on-error
                 >
 
             </div>
@@ -5009,6 +5346,22 @@ function renderGpuPageError(
 document.addEventListener(
     "DOMContentLoaded",
     () => {
+
+        // Show the page once we know who is signed in. A missing session
+        // redirects to sign-in inside apiFetch; any other failure (API down)
+        // still reveals the page so its error messages are visible.
+        accountReady = loadAccount()
+            .catch((error) => {
+                console.error("Account check failed:", error);
+                return null;
+            });
+
+        accountReady
+            .finally(() => {
+                if (!redirectingToSignIn) {
+                    document.documentElement.classList.remove("auth-checking");
+                }
+            });
 
         setupHomeSearch();
 
