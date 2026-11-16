@@ -346,3 +346,42 @@ button { cursor: pointer; }
     .admin-form-grid { grid-template-columns: 1fr; }
     .admin-toolbar h1 { width: 100%; }
 }
+
+/* ---------- number boxes with units ---------- */
+
+.admin-affix {
+    display: flex;
+    align-items: stretch;
+    overflow: hidden;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: #fff;
+}
+
+.admin-affix:focus-within { border-color: var(--blue); outline: 3px solid rgba(8, 116, 249, 0.15); }
+
+.admin-field .admin-affix input {
+    min-width: 0;
+    flex: 1;
+    border: 0;
+    border-radius: 0;
+    outline: 0;
+}
+
+.admin-affix-text {
+    display: grid;
+    place-items: center;
+    padding: 0 10px;
+    background: #f3f6fb;
+    color: var(--muted);
+    font-size: 12px;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.admin-affix-text.is-prefix { border-right: 1px solid var(--line); }
+.admin-affix-text.is-suffix { border-left: 1px solid var(--line); }
+
+.admin-affix:has(.is-invalid) { border-color: var(--danger); background: var(--err-bg); }
+
+.admin-preview { min-height: 14px; color: var(--blue) !important; font-weight: 700; }

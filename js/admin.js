@@ -12,27 +12,74 @@ const IMAGE_MAX_BYTES = 4 * 1024 * 1024;
 
 const $ = (id) => document.getElementById(id);
 
-// The fields of a GPU, in form order. Options mirror the API's allowed values.
+// ---------- unit fields ----------
+// The catalog stores some values as text with a unit ("12GB GDDR7",
+// "192-bit", "2.41 GHz", "250W"). The form takes only the number and adds
+// the unit, so every GPU is written the same way.
+
+// First number in a stored value: "12GB GDDR7" -> 12, "2.41 GHz" -> 2.41.
+function firstNumber(text) {
+    const match = String(text ?? "").replace(",", ".").match(/\d+(?:\.\d+)?/);
+    return match ? Number(match[0]) : "";
+}
+
+// Trim floating-point noise: 2.4100000001 -> "2.41".
+function tidy(n) {
+    return String(Number(n.toFixed(3)));
+}
+
+const UNIT = {
+    vram: {
+        suffix: "GB",
+        toText: (n, form) => `${tidy(n)}GB ${form.memory_type}`,
+        fromText: firstNumber,
+    },
+    bus: {
+        suffix: "-bit",
+        toText: (n) => `${Math.round(n)}-bit`,
+        fromText: firstNumber,
+    },
+    clock: {
+        suffix: "GHz",
+        // 2410 is clearly MHz: store it as 2.41 GHz.
+        toText: (n) => `${tidy(n >= 50 ? n / 1000 : n)} GHz`,
+        fromText: (text) => {
+            const n = firstNumber(text);
+            return n !== "" && /mhz/i.test(text) ? n / 1000 : n;
+        },
+        hint: "MHz also works (2410 → 2.41 GHz)",
+    },
+    watts: {
+        suffix: "W",
+        toText: (n) => `${Math.round(n)}W`,
+        fromText: firstNumber,
+    },
+};
+
+// Core type follows the brand; NVIDIA's cores are CUDA cores.
+const CORE_TYPE_FOR_BRAND = { NVIDIA: "CUDA Cores", AMD: "Stream Processors", Intel: "Xe Cores" };
+
+// The fields of a GPU, in form order. Options mirror the API's allowed
+// values, newest first so the defaults suit a new card.
 const FIELDS = [
     { name: "brand", label: "Brand", type: "select", options: ["NVIDIA", "AMD", "Intel"] },
     { name: "manufacturer", label: "Manufacturer", type: "select", options: ["NVIDIA", "AMD", "Intel", "ASUS", "MSI", "Gigabyte", "Zotac", "PNY", "Palit", "Colorful", "Gainward", "Inno3D", "EVGA", "PowerColor", "Sapphire", "XFX", "ASRock"] },
     { name: "model", label: "Model", type: "text", placeholder: "GeForce RTX 5070" },
     { name: "series", label: "Series", type: "text", placeholder: "GeForce RTX 50 Series" },
     { name: "architecture", label: "Architecture", type: "text", placeholder: "Blackwell" },
-    { name: "vram", label: "VRAM", type: "text", placeholder: "12GB GDDR7" },
-    { name: "memory_type", label: "Memory type", type: "select", options: ["DDR3", "GDDR5", "GDDR5X", "GDDR6", "GDDR6X", "GDDR7"] },
-    { name: "memory_bus", label: "Memory bus", type: "text", placeholder: "192-bit" },
-    { name: "memory_bandwidth_gbps", label: "Bandwidth (GB/s)", type: "number", step: "any", min: "0" },
-    { name: "core_type", label: "Core type", type: "select", options: ["CUDA Cores", "Stream Processors", "Xe Cores"] },
-    { name: "core_count", label: "Core count", type: "number", step: "1", min: "0" },
-    { name: "cuda_cores", label: "CUDA cores", type: "number", step: "1", min: "0", hint: "0 for AMD and Intel" },
-    { name: "base_clock", label: "Base clock", type: "text", placeholder: "2.16 GHz" },
-    { name: "boost_clock", label: "Boost clock", type: "text", placeholder: "2.51 GHz" },
-    { name: "power", label: "Power", type: "text", placeholder: "250W" },
-    { name: "recommended_psu", label: "Recommended PSU", type: "text", placeholder: "650W" },
-    { name: "process_node_nm", label: "Process node (nm)", type: "number", step: "1", min: "1" },
-    { name: "pcie_interface", label: "PCIe interface", type: "select", options: ["PCIe 2.0 x8", "PCIe 2.0 x16", "PCIe 3.0 x4", "PCIe 3.0 x16", "PCIe 4.0 x8", "PCIe 4.0 x16", "PCIe 5.0 x8", "PCIe 5.0 x16"] },
-    { name: "launch_price_usd", label: "Launch price (USD)", type: "number", step: "any", min: "0", optional: true, hint: "Leave empty if unknown" },
+    { name: "memory_type", label: "Memory type", type: "select", options: ["GDDR7", "GDDR6X", "GDDR6", "GDDR5X", "GDDR5", "DDR3"] },
+    { name: "vram", label: "VRAM", unit: UNIT.vram, step: "any", min: "0.5", placeholder: "12" },
+    { name: "memory_bus", label: "Memory bus", unit: UNIT.bus, step: "1", min: "8", placeholder: "192" },
+    { name: "memory_bandwidth_gbps", label: "Bandwidth", type: "number", suffix: "GB/s", step: "any", min: "0", placeholder: "672" },
+    { name: "core_type", label: "Core type", type: "select", options: ["CUDA Cores", "Stream Processors", "Xe Cores"], hint: "Set from the brand" },
+    { name: "core_count", label: "Core count", type: "number", step: "1", min: "0", placeholder: "6144" },
+    { name: "base_clock", label: "Base clock", unit: UNIT.clock, step: "any", min: "0.1", placeholder: "2.16" },
+    { name: "boost_clock", label: "Boost clock", unit: UNIT.clock, step: "any", min: "0.1", placeholder: "2.51" },
+    { name: "power", label: "Power", unit: UNIT.watts, step: "1", min: "1", placeholder: "250" },
+    { name: "recommended_psu", label: "Recommended PSU", unit: UNIT.watts, step: "1", min: "1", placeholder: "650" },
+    { name: "process_node_nm", label: "Process node", type: "number", suffix: "nm", step: "1", min: "1", placeholder: "4" },
+    { name: "pcie_interface", label: "PCIe interface", type: "select", options: ["PCIe 5.0 x16", "PCIe 5.0 x8", "PCIe 4.0 x16", "PCIe 4.0 x8", "PCIe 3.0 x16", "PCIe 3.0 x4", "PCIe 2.0 x16", "PCIe 2.0 x8"] },
+    { name: "launch_price_usd", label: "Launch price", type: "number", prefix: "$", step: "any", min: "0", optional: true, hint: "Leave empty if unknown" },
     { name: "release_date", label: "Release date", type: "date" },
     { name: "description", label: "Description", type: "textarea", wide: true },
 ];
@@ -261,24 +308,82 @@ function buildForm() {
             input.maxLength = 4000;
         } else {
             input = document.createElement("input");
-            input.type = field.type;
+            input.type = field.unit ? "number" : field.type;
             if (field.step) input.step = field.step;
             if (field.min) input.min = field.min;
-            if (field.type === "text") input.maxLength = 120;
+            if (input.type === "text") input.maxLength = 120;
+            if (input.type === "number") input.inputMode = "decimal";
             if (field.placeholder) input.placeholder = field.placeholder;
         }
 
         input.id = `f_${field.name}`;
         input.name = field.name;
         input.required = !field.optional;
-        wrap.append(label, input);
 
-        if (field.hint) {
+        const prefix = field.prefix;
+        const suffix = field.unit?.suffix || field.suffix;
+        if (prefix || suffix) {
+            // Number box with the unit shown inside it, e.g. [ 250 | W ].
+            const box = document.createElement("div");
+            box.className = "admin-affix";
+            if (prefix) box.append(affix(prefix, "is-prefix"));
+            box.append(input);
+            if (suffix) box.append(affix(suffix, "is-suffix"));
+            wrap.append(label, box);
+        } else {
+            wrap.append(label, input);
+        }
+
+        const hintText = field.hint || field.unit?.hint;
+        if (field.unit) {
+            const preview = document.createElement("small");
+            preview.className = "admin-preview";
+            preview.id = `p_${field.name}`;
+            wrap.append(preview);
+        } else if (hintText) {
             const hint = document.createElement("small");
-            hint.textContent = field.hint;
+            hint.textContent = hintText;
             wrap.append(hint);
         }
         grid.append(wrap);
+    }
+
+    // Live "Saved as: ..." previews for the unit fields.
+    grid.addEventListener("input", updatePreviews);
+    grid.addEventListener("change", updatePreviews);
+
+    // Brand drives the core type and, for reference cards, the manufacturer.
+    $("f_brand").addEventListener("change", () => applyBrandDefaults());
+}
+
+function affix(text, className) {
+    const span = document.createElement("span");
+    span.className = `admin-affix-text ${className}`;
+    span.textContent = text;
+    span.setAttribute("aria-hidden", "true");
+    return span;
+}
+
+function applyBrandDefaults() {
+    const brand = $("f_brand").value;
+    $("f_core_type").value = CORE_TYPE_FOR_BRAND[brand];
+    const manufacturer = $("f_manufacturer");
+    if (["NVIDIA", "AMD", "Intel"].includes(manufacturer.value)) {
+        manufacturer.value = brand;
+    }
+    updatePreviews();
+}
+
+function updatePreviews() {
+    const memoryType = $("f_memory_type").value;
+
+    for (const field of FIELDS.filter((f) => f.unit)) {
+        const raw = $(`f_${field.name}`).value.trim();
+        const n = Number(raw);
+        const preview = $(`p_${field.name}`);
+        preview.textContent = raw && Number.isFinite(n) && n > 0
+            ? `Saved as: ${field.unit.toText(n, { memory_type: memoryType })}`
+            : (field.unit.hint || "");
     }
 }
 
@@ -290,9 +395,17 @@ function openForm(gpu = null) {
     for (const field of FIELDS) {
         const input = $(`f_${field.name}`);
         input.classList.remove("is-invalid");
-        const value = gpu ? gpu[field.name] : "";
+        let value = gpu ? gpu[field.name] : "";
+        // Stored text like "12GB GDDR7" goes back into the box as 12.
+        if (field.unit && gpu) value = field.unit.fromText(value);
         input.value = value == null ? "" : value;
         if (!gpu && field.type === "select") input.selectedIndex = 0;
+    }
+
+    if (gpu) {
+        updatePreviews();
+    } else {
+        applyBrandDefaults();
     }
 
     $("gpuDialog").showModal();
@@ -317,17 +430,25 @@ function readForm() {
             continue;
         }
 
-        if (field.type === "number") {
+        if (field.unit || field.type === "number") {
             const number = Number(raw);
-            if (!Number.isFinite(number)) {
+            if (!Number.isFinite(number) || (field.unit && number <= 0)) {
                 missing.push(field);
                 continue;
             }
-            body[field.name] = field.step === "1" ? Math.trunc(number) : number;
+            if (field.unit) {
+                // memory_type comes before vram in FIELDS, so it's already read.
+                body[field.name] = field.unit.toText(number, body);
+            } else {
+                body[field.name] = field.step === "1" ? Math.trunc(number) : number;
+            }
         } else {
             body[field.name] = raw;
         }
     }
+
+    // NVIDIA lists its cores as CUDA cores; AMD and Intel have none.
+    body.cuda_cores = body.brand === "NVIDIA" && Number.isFinite(body.core_count) ? body.core_count : 0;
 
     for (const field of missing) $(`f_${field.name}`).classList.add("is-invalid");
     return { body, missing };
