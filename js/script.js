@@ -193,6 +193,8 @@ function renderAccountBox(account) {
         head,
         divider(),
         item("My favorites", "♥", { href: "favorites.html" }, { badgeId: "favoriteCount" }),
+        item("Recently viewed", "🕘", { href: "index.html#recentPanel" }),
+        item("Saved comparisons", "★", { href: "compare.html#savedComparisons" }),
         divider(),
         item("Sign out", "⎋", signOutHere),
         item("Sign out on all devices", "⊘", signOutEverywhere, { danger: true })
@@ -867,6 +869,197 @@ async function toggleFavorite(button, gpuId) {
     }
 }
 
+
+// ============================================
+// RECENTLY VIEWED (saved to the account)
+// ============================================
+
+// Called whenever a GPU is opened. Fire and forget: a failed save never
+// gets in the way of looking at the GPU.
+function recordRecentView(gpuId) {
+    if (!/^\d+$/.test(String(gpuId ?? ""))) return;
+    accountReady.then((account) => {
+        if (!account) return;
+        apiFetch(`/me/recent/${gpuId}`, { method: "POST" }).catch(() => {});
+    });
+}
+
+async function renderRecentlyViewed() {
+    const panel = $("recentPanel");
+    const strip = $("recentStrip");
+    if (!panel || !strip) return;
+
+    const account = await accountReady;
+    if (!account) return;
+
+    let gpus = [];
+    try {
+        const response = await apiFetch("/me/recent?limit=10", { cache: "no-store" });
+        if (!response.ok) return;
+        gpus = (await response.json()).gpus || [];
+    } catch {
+        return;
+    }
+
+    panel.hidden = gpus.length === 0;
+    strip.replaceChildren();
+
+    for (const gpu of gpus) {
+        const link = document.createElement("a");
+        link.className = "recent-card";
+        link.href = `gpu.html?id=${encodeURIComponent(gpu.id)}`;
+
+        const frame = document.createElement("span");
+        frame.className = "recent-image";
+        const img = document.createElement("img");
+        img.src = getImageFile(gpu);
+        img.alt = "";
+        img.loading = "lazy";
+        img.setAttribute("data-hide-on-error", "");
+        frame.append(img);
+
+        const name = document.createElement("strong");
+        name.textContent = gpu.model || "GPU";
+
+        const meta = document.createElement("small");
+        meta.textContent = [gpu.vram, getLaunchPrice(gpu)].filter(Boolean).join(" · ");
+
+        link.append(frame, name, meta);
+        strip.append(link);
+    }
+}
+
+function setupRecentlyViewed() {
+    if (!$("recentPanel")) return;
+
+    renderRecentlyViewed();
+
+    $("recentClear")?.addEventListener("click", async () => {
+        const button = $("recentClear");
+        button.disabled = true;
+        try {
+            const response = await apiFetch("/me/recent", { method: "DELETE" });
+            if (response.ok) $("recentPanel").hidden = true;
+        } finally {
+            button.disabled = false;
+        }
+    });
+}
+
+
+// ============================================
+// SAVED COMPARISONS (saved to the account)
+// ============================================
+
+let savedComparisons = [];
+
+function samePair(c, a, b) {
+    return (String(c.gpu_a_id) === String(a) && String(c.gpu_b_id) === String(b)) ||
+        (String(c.gpu_a_id) === String(b) && String(c.gpu_b_id) === String(a));
+}
+
+function currentSavedComparison() {
+    if (!compareGpuA || !compareGpuB) return null;
+    return savedComparisons.find((c) => samePair(c, compareGpuA.id, compareGpuB.id)) || null;
+}
+
+function updateSaveComparisonButton() {
+    const button = $("saveComparison");
+    if (!button) return;
+    const saved = currentSavedComparison();
+    button.textContent = saved ? "★ Saved" : "☆ Save comparison";
+    button.classList.toggle("is-saved", Boolean(saved));
+    button.setAttribute("aria-pressed", String(Boolean(saved)));
+    button.title = saved ? "Remove from your saved comparisons" : "Save this pair to your account";
+}
+
+function renderSavedComparisons() {
+    const box = $("savedComparisons");
+    const list = $("savedList");
+    if (!box || !list) return;
+
+    box.hidden = savedComparisons.length === 0;
+    list.replaceChildren();
+
+    for (const c of savedComparisons) {
+        const item = document.createElement("div");
+        item.className = "saved-item";
+
+        const link = document.createElement("a");
+        link.href = `compare.html?gpu1=${encodeURIComponent(c.gpu_a_id)}&gpu2=${encodeURIComponent(c.gpu_b_id)}`;
+        const names = `${c.gpu_a_model || "GPU " + c.gpu_a_id} vs ${c.gpu_b_model || "GPU " + c.gpu_b_id}`;
+        link.textContent = c.name ? `${c.name}: ${names}` : names;
+
+        const remove = document.createElement("button");
+        remove.type = "button";
+        remove.className = "saved-remove";
+        remove.setAttribute("aria-label", `Remove ${names}`);
+        remove.textContent = "×";
+        remove.addEventListener("click", () => deleteSavedComparison(c));
+
+        item.append(link, remove);
+        list.append(item);
+    }
+}
+
+async function deleteSavedComparison(c) {
+    try {
+        const response = await apiFetch(`/me/comparisons/${c.id}`, { method: "DELETE" });
+        if (!response.ok && response.status !== 404) return;
+        savedComparisons = savedComparisons.filter((x) => x.id !== c.id);
+        renderSavedComparisons();
+        updateSaveComparisonButton();
+    } catch {
+        // leave it listed; the user can try again
+    }
+}
+
+async function setupSavedComparisons() {
+    const button = $("saveComparison");
+    if (!button && !$("savedComparisons")) return;
+
+    const account = await accountReady;
+    if (!account) return;
+
+    try {
+        const response = await apiFetch("/me/comparisons", { cache: "no-store" });
+        if (response.ok) savedComparisons = (await response.json()).comparisons || [];
+    } catch {
+        savedComparisons = [];
+    }
+    renderSavedComparisons();
+    updateSaveComparisonButton();
+
+    button?.addEventListener("click", async () => {
+        if (!compareGpuA || !compareGpuB) return;
+        const existing = currentSavedComparison();
+        button.disabled = true;
+        try {
+            if (existing) {
+                await deleteSavedComparison(existing);
+                return;
+            }
+            const response = await apiFetch("/me/comparisons", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ gpu_a_id: compareGpuA.id, gpu_b_id: compareGpuB.id })
+            });
+            if (!response.ok) {
+                const data = await response.json().catch(() => ({}));
+                button.title = typeof data.detail === "string" ? data.detail : "Couldn't save. Try again.";
+                return;
+            }
+            const saved = await response.json();
+            if (!savedComparisons.some((x) => x.id === saved.id)) savedComparisons.unshift(saved);
+            renderSavedComparisons();
+            updateSaveComparisonButton();
+        } catch {
+            button.title = "Couldn't save. Try again.";
+        } finally {
+            button.disabled = false;
+        }
+    });
+}
 
 // ============================================
 // BRAND OVERVIEW
@@ -2971,6 +3164,7 @@ function renderComparisonTable() {
     setText("compareTableGpuB", compareGpuB.model || "GPU 2");
 
     renderCompareVerdict(compareGpuA, compareGpuB);
+    updateSaveComparisonButton();
 
     const differencesOnly = $("differencesOnly")?.checked;
     body.innerHTML = "";
@@ -5056,6 +5250,8 @@ async function setupGpuDetailsPage() {
             gpu
         );
 
+        recordRecentView(gpu.id);
+
         // Heart on the details page saves to the account.
         const heart = document.querySelector(".gpu-page-favorite");
         if (heart) {
@@ -5599,6 +5795,10 @@ document.addEventListener(
         setupGeminiChat();
 
         setupFavoritesPage();
+
+        setupRecentlyViewed();
+
+        setupSavedComparisons();
 
         setupGpuDetailsModal();
 

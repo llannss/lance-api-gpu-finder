@@ -5241,3 +5241,232 @@ html.auth-checking .app {
 .favorites-empty p {
     margin-bottom: 6px;
 }
+
+
+/* ----- hearts on Browse cards and the Browse details panel ----- */
+
+.browse-favorite {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    z-index: 2;
+
+    width: 32px;
+    height: 32px;
+    flex: none;
+
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.92);
+    box-shadow: 0 2px 8px rgba(11, 28, 65, 0.18);
+
+    font-size: 17px;
+}
+
+.browse-favorite:hover {
+    background: #fff;
+}
+
+.details-title-row {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.details-favorite {
+    width: 36px;
+    height: 36px;
+    flex: 0 0 36px;
+
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--white);
+
+    font-size: 19px;
+}
+
+.details-favorite.active {
+    border-color: #f5c2cc;
+    background: #fff5f7;
+}
+
+
+/* =========================================
+   RECENTLY VIEWED (home)
+========================================= */
+
+.recent-panel {
+    margin-bottom: 12px;
+}
+
+.recent-panel[hidden] {
+    display: none;
+}
+
+.recent-clear {
+    border: 0;
+    background: none;
+    cursor: pointer;
+}
+
+.recent-strip {
+    display: flex;
+    gap: 12px;
+    overflow-x: auto;
+    padding: 2px 2px 8px;
+    scroll-snap-type: x proximity;
+}
+
+.recent-card {
+    display: grid;
+    flex: 0 0 170px;
+    gap: 4px;
+    padding: 10px;
+
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: var(--white);
+    color: var(--dark-blue);
+
+    text-decoration: none;
+    scroll-snap-align: start;
+    transition: border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.recent-card:hover {
+    border-color: #b9d6fb;
+    box-shadow: var(--shadow);
+    transform: translateY(-2px);
+}
+
+.recent-image {
+    display: grid;
+    height: 78px;
+    place-items: center;
+    overflow: hidden;
+
+    border-radius: 8px;
+    background: var(--background);
+}
+
+.recent-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.recent-card strong {
+    overflow: hidden;
+    font-size: 12px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.recent-card small {
+    color: var(--text-light);
+    font-size: 11px;
+}
+
+
+/* =========================================
+   SAVED COMPARISONS (compare)
+========================================= */
+
+.saved-comparisons {
+    margin-bottom: 14px;
+    padding: 14px 16px;
+
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    background: var(--white);
+}
+
+.saved-comparisons[hidden] {
+    display: none;
+}
+
+.saved-comparisons h2 {
+    margin-bottom: 10px;
+    font-size: 14px;
+}
+
+.saved-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.saved-item {
+    display: inline-flex;
+    align-items: center;
+    overflow: hidden;
+
+    border: 1px solid #cfe4ff;
+    border-radius: 999px;
+    background: var(--light-blue);
+}
+
+.saved-item a {
+    padding: 6px 4px 6px 12px;
+    color: var(--blue);
+    font-size: 12px;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.saved-item a:hover {
+    text-decoration: underline;
+}
+
+.saved-remove {
+    width: 28px;
+    height: 28px;
+
+    border: 0;
+    background: transparent;
+    color: var(--text-light);
+
+    font-size: 16px;
+    cursor: pointer;
+}
+
+.saved-remove:hover {
+    color: #a12626;
+}
+
+.compare-results-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px;
+}
+
+.save-comparison {
+    height: 34px;
+    padding: 0 14px;
+
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--white);
+    color: var(--dark-blue);
+
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.save-comparison:hover {
+    border-color: var(--blue);
+    color: var(--blue);
+}
+
+.save-comparison.is-saved {
+    border-color: #f0d38a;
+    background: #fff8e1;
+    color: #9a6b00;
+}
+
+.save-comparison:disabled {
+    opacity: 0.6;
+    cursor: wait;
+}

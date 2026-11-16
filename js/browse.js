@@ -275,6 +275,12 @@ function renderBrowseGrid(gpus) {
 
         card.innerHTML = `
             <div class="gpu-image-wrapper">
+                <button
+                    class="gpu-favorite browse-favorite"
+                    type="button"
+                    data-gpu-id="${escapeHTML(String(gpu.id ?? ""))}"
+                    aria-pressed="false"
+                >♡</button>
                 <img
                     src="${escapeHTML(imagePath)}"
                     alt="${escapeHTML(`${brand} ${model}`)}"
@@ -314,12 +320,21 @@ function renderBrowseGrid(gpus) {
             openDetailsSidebar(gpu);
         });
 
+        // Heart saves to the account (shared helpers in script.js).
+        const heart = card.querySelector(".browse-favorite");
+        paintFavoriteButton(heart, getFavoriteIds().has(String(gpu.id)));
+        heart.addEventListener("click", (event) => {
+            event.stopPropagation();
+            toggleFavorite(heart, gpu.id);
+        });
+
         browseGpuGrid.appendChild(card);
     });
 }
 
 function openDetailsSidebar(gpu) {
     selectedGPU = gpu;
+    recordRecentView(gpu.id);
 
     browseLayout.classList.add("details-open");
     detailsEmpty.hidden = true;
@@ -342,9 +357,17 @@ function openDetailsSidebar(gpu) {
                 ${escapeHTML(gpu.brand || "GPU")}
             </span>
 
-            <h2 class="details-title">
-                ${escapeHTML(gpu.model || "Unknown GPU")}
-            </h2>
+            <div class="details-title-row">
+                <h2 class="details-title">
+                    ${escapeHTML(gpu.model || "Unknown GPU")}
+                </h2>
+                <button
+                    class="gpu-favorite details-favorite"
+                    type="button"
+                    data-gpu-id="${escapeHTML(String(gpu.id ?? ""))}"
+                    aria-pressed="false"
+                >♡</button>
+            </div>
 
             <p class="details-series">
                 ${escapeHTML(gpu.series || "--")}
@@ -377,6 +400,10 @@ function openDetailsSidebar(gpu) {
 
         </div>
     `;
+
+    const heart = detailsBody.querySelector(".details-favorite");
+    paintFavoriteButton(heart, getFavoriteIds().has(String(gpu.id)));
+    heart.addEventListener("click", () => toggleFavorite(heart, gpu.id));
 }
 
 function closeDetailsSidebar() {

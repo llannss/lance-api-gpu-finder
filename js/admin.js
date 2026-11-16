@@ -179,6 +179,7 @@ async function loadGpus() {
     gpus = Array.isArray(data.gpus) ? data.gpus : [];
     renderStats();
     renderRows();
+    loadActivity(true);
 }
 
 function renderStats() {
@@ -281,6 +282,91 @@ function showNotice(text, isError = false) {
     box.hidden = false;
     clearTimeout(showNotice.timer);
     if (!isError) showNotice.timer = setTimeout(() => { box.hidden = true; }, 6000);
+}
+
+
+// ---------- activity log ----------
+
+const ACTION_LABELS = {
+    "gpu.create": ["Added", "is-create"],
+    "gpu.update": ["Edited", "is-update"],
+    "gpu.delete": ["Deleted", "is-delete"],
+    "image.upload": ["Picture set", "is-picture"],
+    "image.remove": ["Picture removed", "is-picture"],
+};
+const ACTIVITY_PAGE = 25;
+let activityOffset = 0;
+
+function formatWhen(iso) {
+    const date = new Date(iso);
+    if (Number.isNaN(date.getTime())) return iso || "";
+    return date.toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" });
+}
+
+function summarizeChanges(changes) {
+    if (!changes || typeof changes !== "object") return "";
+    return Object.entries(changes)
+        .map(([field, pair]) => {
+            const [before, after] = Array.isArray(pair) ? pair : [undefined, pair];
+            const show = (v) => (v == null || v === "" ? "—" : String(v)).slice(0, 40);
+            return `${fieldLabel(field)}: ${show(before)} → ${show(after)}`;
+        })
+        .join("\n");
+}
+
+async function loadActivity(reset = true) {
+    if (reset) activityOffset = 0;
+    const body = $("activityRows");
+
+    let data;
+    try {
+        const result = await api(`/admin/audit?limit=${ACTIVITY_PAGE}&offset=${activityOffset}`);
+        if (!result.response.ok) throw new Error(apiError(result.data, "Couldn't load activity."));
+        data = result.data;
+    } catch (error) {
+        body.replaceChildren();
+        const row = body.insertRow();
+        const cell = row.insertCell();
+        cell.colSpan = 5;
+        cell.className = "admin-empty";
+        cell.textContent = error.message || "Couldn't load activity.";
+        return;
+    }
+
+    if (reset) body.replaceChildren();
+    const entries = data.entries || [];
+
+    if (reset && !entries.length) {
+        const row = body.insertRow();
+        const cell = row.insertCell();
+        cell.colSpan = 5;
+        cell.className = "admin-empty";
+        cell.textContent = "No changes yet. Adding, editing or deleting GPUs shows up here.";
+    }
+
+    for (const entry of entries) {
+        const row = body.insertRow();
+        row.insertCell().textContent = formatWhen(entry.created_at);
+        row.insertCell().textContent = entry.admin_email;
+
+        const [label, style] = ACTION_LABELS[entry.action] || [entry.action, ""];
+        const pill = document.createElement("span");
+        pill.className = `admin-action ${style}`;
+        pill.textContent = label;
+        row.insertCell().append(pill);
+
+        row.insertCell().textContent = entry.gpu_id
+            ? `#${entry.gpu_id} ${entry.gpu_model || ""}`.trim()
+            : (entry.gpu_model || "—");
+
+        const changes = row.insertCell();
+        changes.className = "admin-changes";
+        changes.textContent = summarizeChanges(entry.changes) || "—";
+    }
+
+    activityOffset += entries.length;
+    $("activityTotal").textContent = data.total ? `${data.total} change${data.total === 1 ? "" : "s"}` : "";
+    $("activityMore").hidden = activityOffset >= (data.total || 0);
 }
 
 
@@ -573,6 +659,8 @@ async function removePicture(gpu) {
 
 function wireEvents() {
     $("search").addEventListener("input", renderRows);
+    $("activityRefresh").addEventListener("click", () => loadActivity(true));
+    $("activityMore").addEventListener("click", () => loadActivity(false));
     $("onlyMissing").addEventListener("change", renderRows);
     $("addGpu").addEventListener("click", () => openForm());
     $("gpuForm").addEventListener("submit", saveForm);

@@ -76,6 +76,33 @@
                 </table>
             </div>
         </section>
+
+        <section class="admin-panel admin-activity" aria-labelledby="activityTitle">
+            <div class="admin-toolbar">
+                <h1 id="activityTitle">Activity</h1>
+                <span class="admin-muted" id="activityTotal"></span>
+                <button class="admin-btn is-ghost is-small" type="button" id="activityRefresh">Refresh</button>
+            </div>
+            <div class="admin-table-wrap">
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th scope="col">When</th>
+                            <th scope="col">Admin</th>
+                            <th scope="col">Action</th>
+                            <th scope="col">GPU</th>
+                            <th scope="col">Changes</th>
+                        </tr>
+                    </thead>
+                    <tbody id="activityRows">
+                        <tr><td colspan="5" class="admin-empty">Loading activity...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="admin-more">
+                <button class="admin-btn is-ghost" type="button" id="activityMore" hidden>Load older</button>
+            </div>
+        </section>
     </main>
 </div>
 

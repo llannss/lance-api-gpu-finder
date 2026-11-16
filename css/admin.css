@@ -385,3 +385,32 @@ button { cursor: pointer; }
 .admin-affix:has(.is-invalid) { border-color: var(--danger); background: var(--err-bg); }
 
 .admin-preview { min-height: 14px; color: var(--blue) !important; font-weight: 700; }
+
+/* ---------- activity log ---------- */
+
+.admin-activity { margin-top: 18px; }
+.admin-muted { color: var(--muted); font-size: 12px; }
+.admin-more { padding: 12px 18px; text-align: center; }
+.admin-more:has(button[hidden]) { display: none; }
+
+.admin-action {
+    display: inline-block;
+    padding: 3px 9px;
+    border-radius: 999px;
+    background: var(--bg);
+    font-size: 11px;
+    font-weight: 800;
+}
+
+.admin-action.is-create { background: var(--ok-bg); color: var(--ok-ink); }
+.admin-action.is-update { background: #eaf4ff; color: var(--blue-dark); }
+.admin-action.is-delete { background: var(--err-bg); color: var(--err-ink); }
+.admin-action.is-picture { background: #f3ecff; color: #6a3fb5; }
+
+.admin-table td.admin-changes {
+    max-width: 420px;
+    color: var(--muted);
+    font-size: 12px;
+    line-height: 1.5;
+    white-space: pre-line;
+}

@@ -100,6 +100,18 @@
             </a>
         </section>
 
+        <!-- Filled by renderRecentlyViewed() in script.js; hidden until there's history -->
+        <section class="panel recent-panel" id="recentPanel" aria-labelledby="recentTitle" hidden>
+            <div class="panel-header">
+                <div>
+                    <h2 id="recentTitle">🕘 Recently viewed</h2>
+                    <p>GPUs you opened lately, on every device you sign in to.</p>
+                </div>
+                <button class="text-button recent-clear" type="button" id="recentClear">Clear history</button>
+            </div>
+            <div class="recent-strip" id="recentStrip"></div>
+        </section>
+
         <section class="content-grid">
             <section class="panel featured-panel">
                 <div class="panel-header">

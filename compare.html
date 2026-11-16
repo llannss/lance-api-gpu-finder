@@ -240,6 +240,13 @@
              GPU SELECTORS
         ========================================== -->
 
+        <!-- Filled by setupSavedComparisons() in script.js -->
+        <section class="saved-comparisons" id="savedComparisons" aria-labelledby="savedTitle" hidden>
+            <h2 id="savedTitle">★ Saved comparisons</h2>
+            <div class="saved-list" id="savedList"></div>
+        </section>
+
+
         <section class="compare-picker">
 
 
@@ -402,6 +409,12 @@
                 </div>
 
 
+                <div class="compare-results-actions">
+
+                <button class="save-comparison" type="button" id="saveComparison" aria-pressed="false">
+                    ☆ Save comparison
+                </button>
+
                 <label class="difference-toggle">
 
                     <input
@@ -414,6 +427,8 @@
                     </span>
 
                 </label>
+
+                </div>
 
             </div>
 
