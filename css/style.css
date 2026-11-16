@@ -4984,3 +4984,260 @@ html.auth-checking .app {
     font-size: 13px;
     line-height: 1.45;
 }
+
+.gpu-pick-reason {
+    margin: 2px 0 6px;
+    color: #138152;
+    font-size: 11px;
+    font-weight: 700;
+    line-height: 1.35;
+}
+
+
+/* =========================================
+   PROFILE MENU (top bar)
+========================================= */
+
+.profile {
+    position: relative;
+    flex: 0 0 auto;
+}
+
+.profile-trigger {
+    display: inline-flex;
+    height: 43px;
+    align-items: center;
+    gap: 9px;
+    padding: 0 12px 0 5px;
+
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    background: var(--white);
+    color: var(--dark-blue);
+
+    font-size: 13px;
+    font-weight: 700;
+
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.profile-trigger:hover,
+.profile-trigger[aria-expanded="true"] {
+    border-color: #b9d6fb;
+    box-shadow: var(--shadow);
+}
+
+.profile-avatar {
+    display: grid;
+    width: 32px;
+    height: 32px;
+    flex: 0 0 32px;
+    place-items: center;
+
+    border-radius: 50%;
+    background: linear-gradient(135deg, #0874f9 0%, #04375c 100%);
+    color: #fff;
+
+    font-size: 14px;
+    font-weight: 800;
+}
+
+.profile-avatar.is-large {
+    width: 42px;
+    height: 42px;
+    flex-basis: 42px;
+    font-size: 17px;
+}
+
+.profile-name {
+    max-width: 140px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.profile-caret {
+    color: var(--text-light);
+    font-size: 11px;
+}
+
+.profile-panel {
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    z-index: 400;
+
+    width: 270px;
+    padding: 8px;
+
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    background: var(--white);
+    box-shadow: 0 18px 40px rgba(11, 28, 65, 0.16);
+}
+
+.profile-panel[hidden] {
+    display: none;
+}
+
+.profile-head {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    padding: 8px 8px 10px;
+}
+
+.profile-who {
+    display: grid;
+    min-width: 0;
+    gap: 4px;
+}
+
+.profile-who strong {
+    overflow: hidden;
+    font-size: 13px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.profile-role {
+    justify-self: start;
+    padding: 2px 8px;
+
+    border-radius: 999px;
+    background: var(--light-blue);
+    color: var(--blue);
+
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.profile-role.is-admin {
+    background: #fff3e0;
+    color: #b25d00;
+}
+
+.profile-divider {
+    height: 1px;
+    margin: 4px 2px;
+    background: var(--border);
+}
+
+.profile-item {
+    display: flex;
+    width: 100%;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 10px;
+
+    border: 0;
+    border-radius: 9px;
+    background: transparent;
+    color: var(--dark-blue);
+
+    font-size: 13px;
+    font-weight: 600;
+    text-align: left;
+    text-decoration: none;
+}
+
+.profile-item:hover,
+.profile-item:focus-visible {
+    background: var(--light-blue);
+    outline: none;
+}
+
+.profile-item.is-danger {
+    color: #a12626;
+}
+
+.profile-item.is-danger:hover {
+    background: #fff3f3;
+}
+
+.profile-item-icon {
+    width: 18px;
+    color: var(--text-light);
+    text-align: center;
+}
+
+.profile-item.is-danger .profile-item-icon {
+    color: inherit;
+}
+
+.profile-count {
+    margin-left: auto;
+    padding: 1px 8px;
+
+    border-radius: 999px;
+    background: #fde7eb;
+    color: #c2334f;
+
+    font-size: 11px;
+    font-weight: 800;
+}
+
+.profile-count[hidden] {
+    display: none;
+}
+
+@media (max-width: 700px) {
+    .profile-name,
+    .profile-caret {
+        display: none;
+    }
+
+    .profile-trigger {
+        padding: 0 5px;
+    }
+
+    .profile-panel {
+        width: min(270px, calc(100vw - 20px));
+    }
+}
+
+
+/* ----- heart on the GPU details page ----- */
+
+.gpu-page-favorite {
+    width: 44px;
+    height: 44px;
+    flex: 0 0 44px;
+
+    border: 1px solid var(--border);
+    border-radius: 7px;
+    background: var(--white);
+
+    font-size: 20px;
+}
+
+.gpu-page-favorite.active {
+    border-color: #f5c2cc;
+    background: #fff5f7;
+}
+
+
+/* ----- favorites page ----- */
+
+.favorites-grid {
+    grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+}
+
+.favorites-empty {
+    display: grid;
+    grid-column: 1 / -1;
+    justify-items: center;
+    gap: 8px;
+    padding: 40px 16px;
+    text-align: center;
+}
+
+.favorites-empty strong {
+    font-size: 16px;
+}
+
+.favorites-empty p {
+    margin-bottom: 6px;
+}

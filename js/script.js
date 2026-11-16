@@ -95,61 +95,144 @@ async function loadAccount() {
     return currentAccount;
 }
 
+// Profile menu in the top bar: an avatar button that opens a small panel
+// with the account, a link to saved favorites, and sign-out options.
 function renderAccountBox(account) {
-    const sidebar = document.querySelector(".sidebar");
-
-    if (!sidebar || $("accountBox")) return;
-
-    const box = document.createElement("div");
-    box.className = "account-box";
-    box.id = "accountBox";
-
-    const avatar = document.createElement("span");
-    avatar.className = "account-avatar";
-    avatar.setAttribute("aria-hidden", "true");
-    avatar.textContent = (account.email || "?").charAt(0).toUpperCase();
-
-    const info = document.createElement("div");
-    info.className = "account-info";
-
-    const email = document.createElement("strong");
-    email.textContent = account.email;
-    email.title = account.email;
-
-    const role = document.createElement("small");
-    role.textContent = account.role === "admin" ? "Admin" : "Member";
-
-    info.append(email, role);
-
-    const signOut = document.createElement("button");
-    signOut.type = "button";
-    signOut.className = "account-signout";
-    signOut.textContent = "Sign out";
-    signOut.addEventListener("click", signOutHere);
-
-    const signOutAll = document.createElement("button");
-    signOutAll.type = "button";
-    signOutAll.className = "account-signout-all";
-    signOutAll.textContent = "Sign out everywhere";
-    signOutAll.addEventListener("click", signOutEverywhere);
-
-    box.append(avatar, info, signOut, signOutAll);
-
-    const promo = sidebar.querySelector(".sidebar-promo");
-    sidebar.insertBefore(box, promo || null);
-
-    // Phones hide the sidebar, so the top bar gets a compact sign-out too.
     const topbar = document.querySelector(".topbar");
 
-    if (topbar) {
-        const mobile = document.createElement("button");
-        mobile.type = "button";
-        mobile.className = "account-topbar";
-        mobile.textContent = "Sign out";
-        mobile.title = `Signed in as ${account.email}`;
-        mobile.addEventListener("click", signOutHere);
-        topbar.appendChild(mobile);
-    }
+    if (!topbar || $("profileMenu")) return;
+
+    const initial = (account.email || "?").charAt(0).toUpperCase();
+    const isAdmin = account.role === "admin";
+
+    const wrap = document.createElement("div");
+    wrap.className = "profile";
+    wrap.id = "profileMenu";
+
+    // ----- the button -----
+    const trigger = document.createElement("button");
+    trigger.type = "button";
+    trigger.className = "profile-trigger";
+    trigger.setAttribute("aria-haspopup", "menu");
+    trigger.setAttribute("aria-expanded", "false");
+    trigger.setAttribute("aria-controls", "profilePanel");
+    trigger.title = account.email;
+
+    const avatar = document.createElement("span");
+    avatar.className = "profile-avatar";
+    avatar.setAttribute("aria-hidden", "true");
+    avatar.textContent = initial;
+
+    const name = document.createElement("span");
+    name.className = "profile-name";
+    name.textContent = account.email.split("@")[0];
+
+    const caret = document.createElement("span");
+    caret.className = "profile-caret";
+    caret.setAttribute("aria-hidden", "true");
+    caret.textContent = "▾";
+
+    trigger.append(avatar, name, caret);
+
+    // ----- the panel -----
+    const panel = document.createElement("div");
+    panel.className = "profile-panel";
+    panel.id = "profilePanel";
+    panel.setAttribute("role", "menu");
+    panel.hidden = true;
+
+    const head = document.createElement("div");
+    head.className = "profile-head";
+
+    const bigAvatar = avatar.cloneNode(true);
+    bigAvatar.classList.add("is-large");
+
+    const who = document.createElement("div");
+    who.className = "profile-who";
+    const email = document.createElement("strong");
+    email.textContent = account.email;
+    const role = document.createElement("span");
+    role.className = "profile-role" + (isAdmin ? " is-admin" : "");
+    role.textContent = isAdmin ? "Admin" : "Member";
+    who.append(email, role);
+    head.append(bigAvatar, who);
+
+    const item = (label, icon, onSelect, extra) => {
+        const el = document.createElement(onSelect.href ? "a" : "button");
+        el.className = "profile-item" + (extra?.danger ? " is-danger" : "");
+        el.setAttribute("role", "menuitem");
+        if (onSelect.href) {
+            el.href = onSelect.href;
+        } else {
+            el.type = "button";
+            el.addEventListener("click", onSelect);
+        }
+        const i = document.createElement("span");
+        i.className = "profile-item-icon";
+        i.setAttribute("aria-hidden", "true");
+        i.textContent = icon;
+        const t = document.createElement("span");
+        t.textContent = label;
+        el.append(i, t);
+        if (extra?.badgeId) {
+            const b = document.createElement("span");
+            b.className = "profile-count";
+            b.id = extra.badgeId;
+            el.append(b);
+        }
+        return el;
+    };
+
+    const divider = () => {
+        const hr = document.createElement("div");
+        hr.className = "profile-divider";
+        return hr;
+    };
+
+    panel.append(
+        head,
+        divider(),
+        item("My favorites", "♥", { href: "favorites.html" }, { badgeId: "favoriteCount" }),
+        divider(),
+        item("Sign out", "⎋", signOutHere),
+        item("Sign out on all devices", "⊘", signOutEverywhere, { danger: true })
+    );
+
+    wrap.append(trigger, panel);
+    topbar.append(wrap);
+
+    // ----- open / close -----
+    const setOpen = (open) => {
+        panel.hidden = !open;
+        trigger.setAttribute("aria-expanded", String(open));
+        if (open) panel.querySelector(".profile-item")?.focus();
+    };
+
+    trigger.addEventListener("click", (event) => {
+        event.stopPropagation();
+        setOpen(panel.hidden);
+    });
+
+    document.addEventListener("click", (event) => {
+        if (!wrap.contains(event.target)) setOpen(false);
+    });
+
+    document.addEventListener("keydown", (event) => {
+        if (event.key === "Escape" && !panel.hidden) {
+            setOpen(false);
+            trigger.focus();
+        }
+    });
+
+    updateFavoriteCount();
+}
+
+function updateFavoriteCount() {
+    const badge = $("favoriteCount");
+    if (!badge) return;
+    const count = favoriteIds.size;
+    badge.textContent = count ? String(count) : "";
+    badge.hidden = !count;
 }
 
 async function signOutHere() {
@@ -299,24 +382,92 @@ function renderDashboardError() {
 // FEATURED GPUs
 // ============================================
 
-const FEATURE_BADGES = [
+// Featured picks are earned from the data, not hand-picked. Each badge has
+// a rule; a GPU can only win one badge, so four different cards show up.
+const FEATURE_PICKS = [
     {
         text: "Best Overall",
-        className: "badge-green"
+        className: "badge-green",
+        // Strongest card: most memory bandwidth, then most VRAM, then newest.
+        pick: (pool) => maxBy(pool, (g) => [bandwidthOf(g), parseVramGb(g.vram) || 0, getReleaseTimestamp(g)]),
+        reason: (g) => `Highest memory bandwidth: ${bandwidthOf(g).toLocaleString()} GB/s`
     },
     {
         text: "Best Value",
-        className: "badge-blue"
+        className: "badge-blue",
+        // Most bandwidth per dollar, among cards from the last ~4 years of
+        // the catalog so a decade-old bargain doesn't win.
+        pick: (pool, all) => {
+            const newest = Math.max(...all.map(getReleaseTimestamp).filter(Number.isFinite));
+            const recentSince = newest - 4 * 365 * 24 * 3600 * 1000;
+            const candidates = pool.filter((g) =>
+                priceOf(g) > 0 && bandwidthOf(g) > 0 && getReleaseTimestamp(g) >= recentSince
+            );
+            return maxBy(candidates, (g) => [bandwidthOf(g) / priceOf(g), -priceOf(g)]);
+        },
+        reason: (g) => `${(bandwidthOf(g) / priceOf(g)).toFixed(2)} GB/s of bandwidth per dollar`
     },
     {
         text: "Great for Creators",
-        className: "badge-purple"
+        className: "badge-purple",
+        // Video, 3D and AI work need memory: most VRAM, then bandwidth.
+        pick: (pool) => maxBy(pool, (g) => [parseVramGb(g.vram) || 0, bandwidthOf(g)]),
+        reason: (g) => `${parseVramGb(g.vram)}GB of VRAM for video, 3D and AI work`
     },
     {
         text: "Rising Star",
-        className: "badge-orange"
+        className: "badge-orange",
+        // Newest release in the catalog.
+        pick: (pool) => maxBy(pool, (g) => [getReleaseTimestamp(g), Number(g.id) || 0]),
+        reason: (g, all) => {
+            const newest = Math.max(...all.map(getReleaseTimestamp).filter(Number.isFinite));
+            return getReleaseTimestamp(g) >= newest
+                ? `Newest in the catalog, released ${g.release_date}`
+                : `Newest card not already featured, released ${g.release_date}`;
+        }
     }
 ];
+
+function bandwidthOf(gpu) {
+    const n = Number(gpu.memory_bandwidth_gbps);
+    return Number.isFinite(n) ? n : 0;
+}
+
+function priceOf(gpu) {
+    const n = Number(gpu.launch_price_usd);
+    return gpu.launch_price_usd == null || !Number.isFinite(n) ? 0 : n;
+}
+
+// The item with the largest key; keys are arrays compared left to right.
+function maxBy(items, key) {
+    let best = null;
+    let bestKey = null;
+
+    for (const item of items) {
+        const k = key(item).map((v) => (Number.isFinite(v) ? v : -Infinity));
+        const better = !bestKey || k.some((v, i) =>
+            k.slice(0, i).every((w, j) => w === bestKey[j]) && v > bestKey[i]
+        );
+        if (better) {
+            best = item;
+            bestKey = k;
+        }
+    }
+    return best;
+}
+
+function pickFeaturedGPUs(gpus) {
+    const picked = [];
+
+    for (const rule of FEATURE_PICKS) {
+        const pool = gpus.filter((g) => !picked.some((p) => p.gpu === g));
+        const gpu = rule.pick(pool, gpus);
+        if (gpu) {
+            picked.push({ gpu, badge: { ...rule, reason: rule.reason(gpu, gpus) } });
+        }
+    }
+    return picked;
+}
 
 function renderFeaturedGPUs(gpus) {
     const gpuGrid = $("featuredGPUs");
@@ -335,23 +486,9 @@ function renderFeaturedGPUs(gpus) {
         return;
     }
 
-    const featured = [...gpus]
-        .sort(
-            (a, b) =>
-                getReleaseTimestamp(b) -
-                getReleaseTimestamp(a) ||
-
-                Number(b.id || 0) -
-                Number(a.id || 0)
-        )
-        .slice(0, 4);
-
-    featured.forEach((gpu, index) => {
+    pickFeaturedGPUs(gpus).forEach(({ gpu, badge }) => {
         gpuGrid.appendChild(
-            createFeaturedGpuCard(
-                gpu,
-                FEATURE_BADGES[index]
-            )
+            createFeaturedGpuCard(gpu, badge)
         );
     });
 }
@@ -393,6 +530,7 @@ function createFeaturedGpuCard(gpu, badge) {
 
             <span
                 class="gpu-badge ${badge?.className || "badge-blue"}"
+                title="${escapeHTML(badge?.reason || "")}"
             >
                 ${escapeHTML(
                     badge?.text || "Featured"
@@ -440,6 +578,8 @@ function createFeaturedGpuCard(gpu, badge) {
             <p class="gpu-memory">
                 ${escapeHTML(vram)}
             </p>
+
+            ${badge?.reason ? `<p class="gpu-pick-reason">${escapeHTML(badge.reason)}</p>` : ""}
 
             <p class="gpu-description">
                 ${escapeHTML(description)}
@@ -578,64 +718,153 @@ function getLaunchPrice(gpu) {
 }
 
 
+// ---------- favorites (saved to the account) ----------
+// The API keeps each account's favorites, so they follow the user to any
+// browser or device. Hearts saved by the old version in this browser's
+// localStorage are moved into the account once, then cleared.
+
+let favoriteIds = new Set();      // GPU IDs as strings
+let favoritesLoaded = false;
+
 function getFavoriteIds() {
+    return favoriteIds;
+}
+
+async function loadFavorites() {
     try {
-        const saved =
-            JSON.parse(
-                localStorage.getItem(
-                    FAVORITES_KEY
-                ) || "[]"
-            );
+        const response = await apiFetch("/me/favorites", { cache: "no-store" });
+        if (!response.ok) return;
+        const data = await response.json();
+        favoriteIds = new Set((data.gpu_ids || []).map(String));
+        await importLegacyFavorites();
+        favoritesLoaded = true;
+        document.dispatchEvent(new CustomEvent("favorites-loaded"));
+    } catch (error) {
+        console.error("Favorites failed to load:", error);
+    }
+    syncFavoriteButtons();
+    updateFavoriteCount();
+}
 
-        return new Set(
-            Array.isArray(saved)
-                ? saved.map(String)
-                : []
-        );
-
+async function importLegacyFavorites() {
+    let legacy = [];
+    try {
+        legacy = JSON.parse(localStorage.getItem(FAVORITES_KEY) || "[]");
     } catch {
-        return new Set();
+        legacy = [];
+    }
+    if (!Array.isArray(legacy) || !legacy.length) return;
+
+    for (const id of legacy.map(String)) {
+        if (!/^\d+$/.test(id) || favoriteIds.has(id)) continue;
+        try {
+            const response = await apiFetch(`/me/favorites/${id}`, { method: "PUT" });
+            if (response.ok) favoriteIds.add(id);
+        } catch {
+            return;   // try again next visit
+        }
+    }
+    try {
+        localStorage.removeItem(FAVORITES_KEY);
+    } catch {
+        // storage blocked: nothing to clean up
     }
 }
 
+// ---------- favorites page (favorites.html) ----------
 
-function toggleFavorite(button, gpuId) {
-    const favorites =
-        getFavoriteIds();
+async function setupFavoritesPage() {
+    const grid = $("favoritesGrid");
+    if (!grid) return;
 
-    const id =
-        String(gpuId ?? "");
+    const account = await accountReady;
+    if (!account) return;
 
-    if (favorites.has(id)) {
-        favorites.delete(id);
-    } else {
-        favorites.add(id);
+    let gpus = [];
+    try {
+        const response = await apiFetch("/me/favorites", { cache: "no-store" });
+        if (!response.ok) throw new Error(String(response.status));
+        gpus = (await response.json()).gpus || [];
+    } catch {
+        grid.innerHTML = `<div class="empty-state">Couldn't load your favorites. Try again in a moment.</div>`;
+        return;
     }
 
-    localStorage.setItem(
-        FAVORITES_KEY,
-        JSON.stringify(
-            [...favorites]
-        )
-    );
+    const render = () => {
+        const saved = gpus.filter((g) => favoriteIds.has(String(g.id)) || !favoritesLoaded);
+        const summary = $("favoritesSummary");
+        if (summary) {
+            summary.textContent = saved.length
+                ? `${saved.length} saved GPU${saved.length === 1 ? "" : "s"}, synced to your account on every device.`
+                : "Saved to your account, on every device you sign in to.";
+        }
 
-    const active =
-        favorites.has(id);
+        grid.replaceChildren();
+        if (!saved.length) {
+            const empty = document.createElement("div");
+            empty.className = "empty-state favorites-empty";
+            const title = document.createElement("strong");
+            title.textContent = "No favorites yet";
+            const text = document.createElement("p");
+            text.textContent = "Tap the ♡ on any GPU to save it here.";
+            const link = document.createElement("a");
+            link.className = "primary-btn";
+            link.href = "browse.html";
+            link.textContent = "Browse GPUs →";
+            empty.append(title, text, link);
+            grid.append(empty);
+            return;
+        }
+        for (const gpu of saved) {
+            grid.append(createFeaturedGpuCard(gpu, { text: "Saved", className: "badge-blue", reason: "" }));
+        }
+    };
 
-    button.classList.toggle(
-        "active",
-        active
-    );
+    render();
+    // Un-hearting a card here takes it off the page.
+    document.addEventListener("favorites-changed", render);
+    document.addEventListener("favorites-loaded", render);
+}
 
-    button.textContent =
-        active
-            ? "♥"
-            : "♡";
+// Paint every heart on the page from the saved list.
+function syncFavoriteButtons() {
+    for (const button of document.querySelectorAll(".gpu-favorite[data-gpu-id]")) {
+        paintFavoriteButton(button, favoriteIds.has(button.dataset.gpuId));
+    }
+}
 
-    button.setAttribute(
-        "aria-pressed",
-        String(active)
-    );
+function paintFavoriteButton(button, active) {
+    button.classList.toggle("active", active);
+    button.textContent = active ? "♥" : "♡";
+    button.setAttribute("aria-pressed", String(active));
+    button.setAttribute("aria-label", active ? "Remove from favorites" : "Save to favorites");
+    button.title = active ? "Saved to your favorites" : "Save to favorites";
+}
+
+async function toggleFavorite(button, gpuId) {
+    const id = String(gpuId ?? "");
+    if (!/^\d+$/.test(id) || button.disabled) return;
+
+    const adding = !favoriteIds.has(id);
+
+    // Show the change at once, then save it; undo if the save fails.
+    adding ? favoriteIds.add(id) : favoriteIds.delete(id);
+    syncFavoriteButtons();
+    updateFavoriteCount();
+    button.disabled = true;
+
+    try {
+        const response = await apiFetch(`/me/favorites/${id}`, { method: adding ? "PUT" : "DELETE" });
+        if (!response.ok) throw new Error(String(response.status));
+        document.dispatchEvent(new CustomEvent("favorites-changed"));
+    } catch {
+        adding ? favoriteIds.delete(id) : favoriteIds.add(id);
+        syncFavoriteButtons();
+        updateFavoriteCount();
+        button.title = "Couldn't save. Try again.";
+    } finally {
+        button.disabled = false;
+    }
 }
 
 
@@ -4827,6 +5056,13 @@ async function setupGpuDetailsPage() {
             gpu
         );
 
+        // Heart on the details page saves to the account.
+        const heart = document.querySelector(".gpu-page-favorite");
+        if (heart) {
+            paintFavoriteButton(heart, favoriteIds.has(String(gpu.id)));
+            heart.addEventListener("click", () => toggleFavorite(heart, gpu.id));
+        }
+
         // Admins get picture controls. The API checks the role again.
         accountReady.then((account) => {
             if (account?.role === "admin") {
@@ -5113,6 +5349,14 @@ function renderGpuDetailsPage(gpu) {
                         Find Similar
                     </a>
 
+
+                    <button
+                        type="button"
+                        class="gpu-favorite gpu-page-favorite"
+                        data-gpu-id="${escapeHTML(String(gpu.id ?? ""))}"
+                        aria-pressed="false"
+                    >♡</button>
+
                 </div>
 
             </div>
@@ -5339,6 +5583,10 @@ document.addEventListener(
                 return null;
             });
 
+        accountReady.then((account) => {
+            if (account) loadFavorites();
+        });
+
         accountReady
             .finally(() => {
                 if (!redirectingToSignIn) {
@@ -5349,6 +5597,8 @@ document.addEventListener(
         setupHomeSearch();
 
         setupGeminiChat();
+
+        setupFavoritesPage();
 
         setupGpuDetailsModal();
 
