@@ -2,12 +2,21 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "cleanUrls": false,
   "redirects": [
-    { "source": "/arena", "destination": "/arena/", "permanent": false }
+    { "source": "/arena", "destination": "/arena/", "permanent": false },
+    { "source": "/market", "destination": "/market/", "permanent": false }
   ],
   "rewrites": [
     {
       "source": "/api/:path*",
       "destination": "https://lance-api-murex.vercel.app/:path*"
+    },
+    {
+      "source": "/market/",
+      "destination": "https://lance-api-gpu-market.vercel.app/index.html"
+    },
+    {
+      "source": "/market/:path*",
+      "destination": "https://lance-api-gpu-market.vercel.app/:path*"
     },
     {
       "source": "/arena/",

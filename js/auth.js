@@ -180,6 +180,8 @@ function safeNext() {
     // GPU Guessr lives at /arena/ (a rewrite to its own project); keep a
     // challenge link's ?mode=…&seed=… so the friend lands on the same run
     if (/^arena\/(\?[^#\s]*)?$/.test(next)) return next;
+    // the Marketplace keeps its view in the #, e.g. market/#/listing/12
+    if (/^market\/(\?[^#\s]*)?(#\/[\w\/?=&-]*)?$/.test(next)) return next;
     return /^[a-z0-9-]+\.html(\?[^#\s]*)?$/i.test(next) ? next : "index.html";
 }
 
