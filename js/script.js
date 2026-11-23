@@ -19,6 +19,7 @@ const ICON_PATHS = {
     star: '<path d="m12 3.8 2.5 5.1 5.6.8-4 3.9.9 5.6-5-2.6-5 2.6.9-5.6-4-3.9 5.6-.8z"/>',
     swap: '<path d="M7 4v16M4 7l3-3 3 3M17 20V4M14 17l3 3 3-3"/>',
     logout: '<path d="M14 4h4a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-4M10 16l-4-4 4-4M6 12h10"/>',
+    chat: '<path d="M4 6.5A2.5 2.5 0 0 1 6.5 4h11A2.5 2.5 0 0 1 20 6.5v8a2.5 2.5 0 0 1-2.5 2.5H10l-4.5 3.5V17H6.5A2.5 2.5 0 0 1 4 14.5z"/>',
     bag: '<path d="M4 9h16l-1.5 10.5h-13z"/><path d="M8.5 9V7a3.5 3.5 0 0 1 7 0v2"/>',
     gamepad: '<rect x="2.5" y="7" width="19" height="11" rx="4"/><path d="M7 10.5v4M5 12.5h4M15.5 11.5h.01M18 13.5h.01"/>',
     devices: '<rect x="3" y="5" width="13" height="10" rx="1.5"/><path d="M7 19h5M9.5 15v4"/><rect x="17.5" y="9" width="4" height="10" rx="1"/>'
@@ -158,6 +159,12 @@ function renderAccountBox(account) {
     avatar.className = "profile-avatar";
     avatar.setAttribute("aria-hidden", "true");
     avatar.textContent = initial;
+    // a dot on the avatar when Marketplace messages are waiting
+    const dot = document.createElement("span");
+    dot.className = "profile-dot";
+    dot.id = "profileDot";
+    dot.hidden = true;
+    avatar.append(dot);
 
     const name = document.createElement("span");
     name.className = "profile-name";
@@ -234,6 +241,7 @@ function renderAccountBox(account) {
         divider(),
         item("Play GPU Guessr", "gamepad", { href: "/arena/" }),
         item("Marketplace", "bag", { href: "/market/" }),
+        item("Messages", "chat", { href: "/market/#/inbox" }, { badgeId: "marketUnread" }),
         divider(),
         item("Sign out", "logout", signOutHere),
         item("Sign out on all devices", "devices", signOutEverywhere, { danger: true })
@@ -266,6 +274,30 @@ function renderAccountBox(account) {
     });
 
     updateFavoriteCount();
+}
+
+// Unread Marketplace messages, shown on every Finder page so a seller hears
+// about a buyer without having to open the Marketplace. Quietly does nothing
+// if the Marketplace isn't set up (its tables missing) or can't be reached.
+async function loadMarketUnread() {
+    try {
+        const response = await apiFetch("/me/unread", { cache: "no-store" });
+        if (!response.ok) return;
+        const { unread } = await response.json();
+        const badge = $("marketUnread");
+        if (badge) {
+            badge.textContent = unread ? String(unread) : "";
+            badge.hidden = !unread;
+        }
+        const dot = $("profileDot");
+        if (dot) dot.hidden = !unread;
+        document.querySelector(".profile-trigger")?.setAttribute(
+            "aria-label",
+            unread ? `Account menu, ${unread} unread message${unread === 1 ? "" : "s"}` : "Account menu"
+        );
+    } catch {
+        // leave the menu as it is
+    }
 }
 
 function updateFavoriteCount() {
@@ -5964,7 +5996,10 @@ document.addEventListener(
             });
 
         accountReady.then((account) => {
-            if (account) loadFavorites();
+            if (account) {
+                loadFavorites();
+                loadMarketUnread();
+            }
         });
 
         accountReady

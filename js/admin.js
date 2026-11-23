@@ -155,6 +155,7 @@ async function start() {
 
     buildForm();
     wireEvents();
+    loadReports();
     await loadGpus();
 }
 
@@ -631,6 +632,102 @@ function confirmDelete(gpu) {
 }
 
 
+// ---------- Marketplace reports ----------
+
+const REPORT_REASONS = {
+    scam: "Looks like a scam",
+    wrong_item: "Not what it says",
+    offensive: "Offensive",
+    sold_elsewhere: "Already sold",
+    other: "Something else",
+};
+
+async function loadReports() {
+    const body = $("reportRows");
+    const message = (text) => {
+        body.replaceChildren();
+        const cell = body.insertRow().insertCell();
+        cell.colSpan = 5;
+        cell.className = "admin-empty";
+        cell.textContent = text;
+    };
+    let data;
+    try {
+        const result = await api("/admin/reports");
+        if (!result.response.ok) throw new Error(apiError(result.data, "Couldn't load reports."));
+        data = result.data;
+    } catch (error) {
+        // before market.sql runs, the Marketplace tables don't exist yet
+        message(error.message || "Couldn't load reports.");
+        return;
+    }
+    const reports = data.reports || [];
+    $("reportsTotal").textContent = reports.length ? `${reports.length} open` : "";
+    if (!reports.length) {
+        message("No open reports. Members can report a listing from its page.");
+        return;
+    }
+    body.replaceChildren();
+    for (const report of reports) {
+        const row = body.insertRow();
+        row.insertCell().textContent = formatWhen(report.created_at);
+
+        const listing = row.insertCell();
+        listing.className = "admin-model";
+        const link = document.createElement("a");
+        link.href = `/market/#/listing/${report.listing.id}`;
+        link.target = "_blank";
+        link.rel = "noopener";
+        link.textContent = report.listing.title;
+        listing.append(link);
+        if (report.listing.status === "sold") {
+            const note = document.createElement("small");
+            note.textContent = "Marked sold";
+            listing.append(note);
+        }
+
+        row.insertCell().textContent = REPORT_REASONS[report.reason] || report.reason;
+        const details = row.insertCell();
+        details.className = "admin-changes";
+        details.textContent = report.details || "—";
+
+        const actions = document.createElement("div");
+        actions.className = "admin-actions";
+        actions.append(
+            button("Dismiss", "is-ghost", () => dismissReport(report)),
+            button("Delete listing", "is-danger-quiet", () => confirmDeleteListing(report)),
+        );
+        row.insertCell().append(actions);
+    }
+}
+
+async function dismissReport(report) {
+    const { response, data } = await api(`/admin/reports/${report.id}`, { method: "DELETE" });
+    if (!response.ok) {
+        showNotice(apiError(data, "Couldn't dismiss the report."), true);
+        return;
+    }
+    showNotice(`Dismissed the report on "${report.listing.title}".`);
+    loadReports();
+}
+
+function confirmDeleteListing(report) {
+    $("confirmTitle").textContent = "Delete this listing?";
+    $("confirmText").textContent =
+        `"${report.listing.title}" will be removed from the Marketplace with its photos, messages and reports. This can't be undone.`;
+    confirmAction = async () => {
+        const { response, data } = await api(`/listings/${report.listing.id}`, { method: "DELETE" });
+        if (!response.ok) {
+            showNotice(apiError(data, "Couldn't delete the listing."), true);
+            return;
+        }
+        showNotice(`Deleted "${report.listing.title}".`);
+        await loadReports();
+    };
+    $("confirmDialog").showModal();
+}
+
+
 // ---------- pictures ----------
 
 function choosePicture(gpu) {
@@ -686,6 +783,7 @@ async function removePicture(gpu) {
 function wireEvents() {
     $("search").addEventListener("input", renderRows);
     $("activityRefresh").addEventListener("click", () => loadActivity(true));
+    $("reportsRefresh").addEventListener("click", loadReports);
     $("activityMore").addEventListener("click", () => loadActivity(false));
     $("onlyMissing").addEventListener("change", renderRows);
     $("addGpu").addEventListener("click", () => openForm());

@@ -5659,3 +5659,25 @@ html.auth-checking .app {
     color: var(--nx-muted);
     cursor: default;
 }
+
+
+/* ---------- unread Marketplace messages on the profile avatar ---------- */
+
+.profile-avatar {
+    position: relative;
+}
+
+.profile-dot {
+    position: absolute;
+    top: -2px;
+    right: -2px;
+    width: 11px;
+    height: 11px;
+    border: 2px solid var(--nx-surface);
+    border-radius: 50%;
+    background: var(--nx-danger);
+}
+
+.profile-dot[hidden] {
+    display: none;
+}

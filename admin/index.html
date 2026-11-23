@@ -79,6 +79,30 @@
             </div>
         </section>
 
+        <section class="admin-panel admin-activity" aria-labelledby="reportsTitle">
+            <div class="admin-toolbar">
+                <h2 id="reportsTitle">Marketplace reports</h2>
+                <span class="admin-muted" id="reportsTotal"></span>
+                <button class="admin-btn is-ghost is-small" type="button" id="reportsRefresh">Refresh</button>
+            </div>
+            <div class="admin-table-wrap">
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th scope="col">When</th>
+                            <th scope="col">Listing</th>
+                            <th scope="col">Reason</th>
+                            <th scope="col">Details</th>
+                            <th scope="col"><span class="visually-hidden">Actions</span></th>
+                        </tr>
+                    </thead>
+                    <tbody id="reportRows">
+                        <tr><td colspan="5" class="admin-empty">Loading reports...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
         <section class="admin-panel admin-activity" aria-labelledby="activityTitle">
             <div class="admin-toolbar">
                 <h2 id="activityTitle">Activity</h2>
