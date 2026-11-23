@@ -1,5 +1,5 @@
 // ============================================
-// GPU Finder: sign in, sign up, confirm email, reset password
+// GPU Nexus: sign in, sign up, confirm email, reset password
 // These pages don't load script.js, so they never redirect to themselves.
 // ============================================
 
@@ -166,7 +166,7 @@ async function setupSignIn() {
             form.password.value = "";
             form.password.focus();
         } catch {
-            showMessage("Can't reach GPU Finder right now. Check your connection.");
+            showMessage("Can't reach GPU Nexus right now. Check your connection.");
         } finally {
             setBusy(form, false);
         }
@@ -201,7 +201,7 @@ function setupSignUp() {
 
             showMessage(errorText(data, "Couldn't create the account. Try again."));
         } catch {
-            showMessage("Can't reach GPU Finder right now. Check your connection.");
+            showMessage("Can't reach GPU Nexus right now. Check your connection.");
         } finally {
             setBusy(form, false);
         }
@@ -233,7 +233,7 @@ async function setupVerify() {
         }
     } catch {
         lead.textContent = "We couldn't confirm your email.";
-        showMessage("Can't reach GPU Finder right now. Reload the page to try again.");
+        showMessage("Can't reach GPU Nexus right now. Reload the page to try again.");
     }
 }
 
@@ -274,7 +274,7 @@ function setupReset() {
                 showMessage(errorText(data, "Couldn't send the link. Try again later."));
             }
         } catch {
-            showMessage("Can't reach GPU Finder right now. Check your connection.");
+            showMessage("Can't reach GPU Nexus right now. Check your connection.");
         } finally {
             setBusy(forgotForm, false);
         }
@@ -301,7 +301,7 @@ function setupReset() {
             resetForm.hidden = true;
             forgotForm.hidden = false;
         } catch {
-            showMessage("Can't reach GPU Finder right now. Check your connection.");
+            showMessage("Can't reach GPU Nexus right now. Check your connection.");
         } finally {
             setBusy(resetForm, false);
         }

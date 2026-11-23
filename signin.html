@@ -3,48 +3,132 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sign in - GPU Finder</title>
-    <link rel="stylesheet" href="css/style.css">
+    <title>Sign in - GPU Nexus</title>
+    <link rel="stylesheet" href="css/nexus-auth.css">
 </head>
-<body class="auth-page" data-page="signin">
-    <main class="auth-card">
-        <a class="logo" href="index.html" aria-label="GPU Finder home">
-            <span class="logo-icon" aria-hidden="true">
-                <svg viewBox="0 0 60 53" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M17.2115 52.8962L20.7656 50.3033L19.5362 48.6181L20.7212 47.7536L23.1805 51.1247L37.9919 40.3192L35.5325 36.9481L59.2295 19.6601L44.8866 0L5.19331 28.958L3.55412 26.7112L0 29.3041L17.2115 52.8962Z" fill="#04375C"/>
-                </svg>
-            </span>
-            <span>
-                <strong>GPU Finder</strong>
-                <small>Find Your Next Upgrade</small>
-            </span>
+<body class="nx-page" data-page="signin">
+    <div class="nx-backdrop" aria-hidden="true"></div>
+    <svg class="nx-wave" viewBox="0 0 800 160" preserveAspectRatio="none" aria-hidden="true">
+        <path d="M0 70C160 20 330 10 520 60C640 92 720 120 800 160H0Z" fill="#c4b5fd" fill-opacity="0.45"/>
+        <path d="M0 110C180 60 360 70 540 110C650 134 730 150 800 160H0Z" fill="#8b5cf6" fill-opacity="0.35"/>
+    </svg>
+
+    <header class="nx-header">
+        <a class="nx-brand" href="index.html" aria-label="GPU Nexus home">
+            <svg class="nx-chip" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+                <path d="M11 2.5v4M16 2.5v4M21 2.5v4M11 25.5v4M16 25.5v4M21 25.5v4M2.5 11h4M2.5 16h4M2.5 21h4M25.5 11h4M25.5 16h4M25.5 21h4" stroke="#1e1b4b" stroke-width="2" stroke-linecap="round"/>
+                <rect x="6.5" y="6.5" width="19" height="19" rx="4.5" fill="#f5f3ff" stroke="#1e1b4b" stroke-width="2"/>
+                <circle cx="16" cy="16" r="6" fill="#8b5cf6"/>
+                <path d="M16 16c0-2.4 1.1-3.9 3-4.3M16 16c2.1 1.2 2.8 3 2.1 4.8M16 16c-2.1 1.2-4 1.2-5.2-.3" stroke="#fff" stroke-width="1.5" stroke-linecap="round"/>
+                <circle cx="16" cy="16" r="1.3" fill="#fff"/>
+            </svg>
+            <span class="nx-wordmark">GPU <span>Nexus</span></span>
         </a>
 
-        <h1>Welcome back</h1>
-        <p class="auth-lead">Sign in to browse, compare and rank GPUs.</p>
+        <nav class="nx-nav" aria-label="Products">
+            <a href="index.html">Finder</a>
+            <span class="nx-nav-item">Guesser</span>
+            <span class="nx-nav-item">Marketplace</span>
+        </nav>
+    </header>
 
-        <p class="auth-message" id="authMessage" role="status" aria-live="polite" hidden></p>
+    <main class="nx-layout">
+        <section class="nx-hero" aria-labelledby="heroTitle">
+            <p class="nx-eyebrow">The ultimate GPU hub</p>
+            <h2 class="nx-title" id="heroTitle">Find, Play, and Trade <span>GPUs</span></h2>
+            <p class="nx-lead">Compare GPU specs, test your knowledge, and buy or sell GPUs, all in one place.</p>
+        </section>
 
-        <form class="auth-form" id="authForm" novalidate>
-            <div class="auth-field">
-                <label for="email">Email</label>
-                <input id="email" name="email" type="email" autocomplete="email" required maxlength="254">
+        <ul class="nx-features" aria-label="What's inside">
+            <li class="nx-feature">
+                <svg class="nx-feature-icon is-blue" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                    <circle cx="10.5" cy="10.5" r="6.5" stroke="currentColor" stroke-width="2"/>
+                    <path d="M20 20l-4.8-4.8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+                <h3>GPU Finder</h3>
+                <p>Search, compare, and rank GPUs.</p>
+            </li>
+            <li class="nx-feature">
+                <svg class="nx-feature-icon is-purple" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                    <path d="M6.5 8h11a4 4 0 0 1 3.9 4.9l-.9 3.8a2.4 2.4 0 0 1-4.1 1.1L14.6 16H9.4l-1.8 1.8a2.4 2.4 0 0 1-4.1-1.1l-.9-3.8A4 4 0 0 1 6.5 8z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+                    <path d="M8 10.5v3M6.5 12h3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                    <circle cx="15.5" cy="11.2" r="1" fill="currentColor"/>
+                    <circle cx="17.5" cy="13.2" r="1" fill="currentColor"/>
+                </svg>
+                <h3>GPU Guesser</h3>
+                <p>A fun game to test your GPU knowledge.</p>
+            </li>
+            <li class="nx-feature">
+                <svg class="nx-feature-icon is-blue" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                    <path d="M2.5 3.5h2.2l2.5 10.7a1.6 1.6 0 0 0 1.6 1.3h8.5a1.6 1.6 0 0 0 1.5-1.2l1.7-6.8H5.6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <circle cx="9.5" cy="19.5" r="1.5" fill="currentColor"/>
+                    <circle cx="17" cy="19.5" r="1.5" fill="currentColor"/>
+                </svg>
+                <h3>GPU Marketplace</h3>
+                <p>Buy, sell, and trade GPUs safely.</p>
+            </li>
+        </ul>
+
+        <div class="nx-card">
+            <div class="nx-card-brand" aria-hidden="true">
+                <svg class="nx-chip" viewBox="0 0 32 32" fill="none">
+                    <path d="M11 2.5v4M16 2.5v4M21 2.5v4M11 25.5v4M16 25.5v4M21 25.5v4M2.5 11h4M2.5 16h4M2.5 21h4M25.5 11h4M25.5 16h4M25.5 21h4" stroke="#1e1b4b" stroke-width="2" stroke-linecap="round"/>
+                    <rect x="6.5" y="6.5" width="19" height="19" rx="4.5" fill="#f5f3ff" stroke="#1e1b4b" stroke-width="2"/>
+                    <circle cx="16" cy="16" r="6" fill="#8b5cf6"/>
+                    <path d="M16 16c0-2.4 1.1-3.9 3-4.3M16 16c2.1 1.2 2.8 3 2.1 4.8M16 16c-2.1 1.2-4 1.2-5.2-.3" stroke="#fff" stroke-width="1.5" stroke-linecap="round"/>
+                    <circle cx="16" cy="16" r="1.3" fill="#fff"/>
+                </svg>
+                <span class="nx-wordmark">GPU <span>Nexus</span></span>
             </div>
 
-            <div class="auth-field">
-                <label for="password">Password</label>
-                <input id="password" name="password" type="password" autocomplete="current-password" required minlength="8" maxlength="128">
-            </div>
+            <h1>Welcome back</h1>
+            <p class="nx-card-lead">Sign in to your GPU Nexus account.</p>
 
-            <div class="auth-row">
-                <a href="reset.html">Forgot password?</a>
-            </div>
+            <p class="auth-message" id="authMessage" role="status" aria-live="polite" hidden></p>
 
-            <button class="primary-btn auth-submit" type="submit">Sign in</button>
-        </form>
+            <form class="nx-form" id="authForm" novalidate>
+                <div class="nx-field">
+                    <label for="email">Email</label>
+                    <div class="nx-input">
+                        <svg class="nx-input-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                            <rect x="3" y="5" width="18" height="14" rx="2.5" stroke="currentColor" stroke-width="1.8"/>
+                            <path d="M3.8 7.2l8.2 6 8.2-6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                        <input id="email" name="email" type="email" autocomplete="email" autocapitalize="off" spellcheck="false" enterkeyhint="next" placeholder="you@example.com" required maxlength="254">
+                    </div>
+                </div>
 
-        <p class="auth-switch">New to GPU Finder? <a href="signup.html">Create an account</a></p>
+                <div class="nx-field">
+                    <div class="nx-label-row">
+                        <label for="password">Password</label>
+                        <a href="reset.html">Forgot password?</a>
+                    </div>
+                    <div class="nx-input">
+                        <svg class="nx-input-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                            <rect x="4.5" y="10.5" width="15" height="10" rx="2.5" stroke="currentColor" stroke-width="1.8"/>
+                            <path d="M8 10.5V8a4 4 0 0 1 8 0v2.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                        </svg>
+                        <input id="password" name="password" type="password" autocomplete="current-password" enterkeyhint="go" placeholder="Enter your password" required minlength="8" maxlength="128" aria-describedby="capsHint" data-caps="capsHint">
+                        <button class="nx-reveal" type="button" aria-controls="password" aria-label="Show password" aria-pressed="false">
+                            <svg class="nx-eye" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                                <path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
+                                <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.8"/>
+                            </svg>
+                            <svg class="nx-eye-off" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                                <path d="M3 3l18 18M10.6 5.1A10 10 0 0 1 12 5c6.4 0 10 7 10 7a17 17 0 0 1-3.2 4.1M6.6 6.6C3.8 8.4 2 12 2 12s3.6 7 10 7a9.7 9.7 0 0 0 5.4-1.6M9.9 9.9a3 3 0 0 0 4.2 4.2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                        </button>
+                    </div>
+                    <p class="nx-caps" id="capsHint" hidden>Caps Lock is on.</p>
+                </div>
+
+                <button class="nx-submit" type="submit">Sign in</button>
+            </form>
+
+            <p class="nx-switch">New to GPU Nexus? <a href="signup.html">Create an account</a></p>
+        </div>
     </main>
 <script src="js/auth.js"></script>
+<script src="js/nexus-auth-ui.js"></script>
 </body>
 </html>
