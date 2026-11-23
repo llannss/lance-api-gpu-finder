@@ -80,6 +80,9 @@ document.addEventListener("DOMContentLoaded", () => {
     document.addEventListener("input", (event) => {
         if (event.target.matches?.("[aria-invalid='true']")) {
             event.target.removeAttribute("aria-invalid");
+
+            const error = document.getElementById(`${event.target.id}-error`);
+            if (error) error.hidden = true;
         }
     });
 
@@ -145,6 +148,9 @@ document.addEventListener("DOMContentLoaded", () => {
         new MutationObserver(() => {
             if (!message.hidden && message.classList.contains("is-error")) shakeVisibleForm();
         }).observe(message, { attributes: true, attributeFilter: ["hidden", "class"], childList: true });
+
+        // field-level errors (auth.js flagField) shake the form too
+        window.nxShake = shakeVisibleForm;
     }
 
     // ---------- put the cursor in the first field (mouse and keyboard only) ----------

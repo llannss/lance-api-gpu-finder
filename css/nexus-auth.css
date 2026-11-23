@@ -54,7 +54,7 @@
     --nx-font: "Archivo", "Archivo Fallback", Arial, sans-serif;
 
     /* type roles (size / weight):
-       display  72 (sign-in 54) / 700   the hero line
+       display  80 / 700                the hero line (sign-in and sign-up)
        title    32 (focused 28) / 700   the card's h1
        lead     20 / 400                 hero paragraph
        body     16 / 400                 inputs, card lead, buttons (600)
@@ -142,16 +142,51 @@ button {
     clip-path: polygon(34% 0, 100% 0, 100% 100%, 0 100%);
 }
 
-/* a graphics card drawn in one thin white line, low opacity, peeking out
-   from behind the card: product-specific texture instead of a glow */
+/* The panel's centerpiece: a graphics card in one white line, big enough
+   that the sign-in card sits on it, fans slowly turning. It's the page's
+   signature, so it gets the room; everything else on the panel stays flat. */
 .nx-gpu-art {
     position: absolute;
-    top: 48px;
-    right: -150px;
+    top: 50%;
+    right: -250px;
 
-    width: 620px;
-    opacity: 0.16;
-    transform: rotate(-8deg);
+    width: 1180px;
+    color: #fff;
+    opacity: 0.5;
+    transform: translateY(-50%) rotate(-12deg);
+}
+
+/* sign-in / sign-up: the card sits mid-panel, so the drawing drops lower
+   and the right-hand fan shows below and beside the card */
+[data-page="signin"] .nx-gpu-art,
+[data-page="signup"] .nx-gpu-art {
+    top: auto;
+    right: -250px;
+    bottom: -130px;
+    transform: rotate(-12deg);
+}
+
+/* fan blades turn around their hub (the group's origin is the fan center);
+   the two fans counter-rotate like a real twin-fan card */
+.nx-fan {
+    transform-origin: 0 0;
+    animation: nx-fan-spin 14s linear infinite;
+}
+
+.nx-gpu-art > g:last-of-type .nx-fan,
+.nx-gpu-mark > g:last-of-type .nx-fan {
+    animation-direction: reverse;
+}
+
+@keyframes nx-fan-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* the tablet/phone crop behind the headline; desktop has the panel instead */
+.nx-gpu-mark {
+    display: none;
 }
 
 
@@ -174,8 +209,6 @@ button {
     display: inline-flex;
     align-items: center;
     gap: 12px;
-
-    text-decoration: none;
 }
 
 .nx-chip {
@@ -203,56 +236,17 @@ button {
 
     padding-left: 36px;
     border-left: 1px solid var(--nx-line);
+    list-style: none;
 
-    font-size: 16px;
-    font-weight: 600;
-}
-
-.nx-nav a,
-.nx-nav-item {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-
-    color: var(--nx-ink-soft);
-    text-decoration: none;
-}
-
-.nx-nav a {
-    position: relative;
-}
-
-/* a product name that isn't a link yet (Marketplace): readable, but quieter
-   than the links so it doesn't promise a click */
-.nx-nav-item {
     color: var(--nx-muted);
-    font-weight: 400;
+    font-size: 16px;
+    font-weight: 500;
+}
+
+/* plain product names, not links: everything behind them needs a sign-in,
+   so nothing here invites a click */
+.nx-nav li {
     cursor: default;
-}
-
-.nx-nav a::after {
-    content: "";
-    position: absolute;
-    left: 0;
-    right: 0;
-    bottom: -6px;
-
-    height: 2px;
-    border-radius: 2px;
-    background: var(--nx-purple-bright);
-    transform: scaleX(0);
-    transform-origin: left;
-    transition: transform 200ms var(--ease-out);
-}
-
-.nx-nav a:focus-visible::after {
-    transform: scaleX(1);
-}
-
-@media (hover: hover) and (pointer: fine) {
-    .nx-nav a:hover::after {
-        transform: scaleX(1);
-    }
 }
 
 
@@ -302,17 +296,13 @@ button {
     margin-bottom: 24px;
     text-wrap: balance;
 
-    font-size: clamp(40px, 5.4vw, 72px);
+    font-size: clamp(44px, 5.8vw, 80px);
     font-weight: 700;
     line-height: 1.02;
     letter-spacing: -0.035em;
 }
 
-/* Returning visitors came to sign in, so on that page the pitch steps back
-   and the card leads. Sign-up keeps the full-size pitch. */
-[data-page="signin"] .nx-title {
-    font-size: clamp(36px, 3.8vw, 54px);
-}
+
 
 .nx-title span {
     color: var(--nx-purple);
@@ -614,6 +604,41 @@ button {
         opacity: 0;
         transform: translateY(-3px);
     }
+}
+
+/* an error about one field, right under it (added by auth.js flagField) */
+.nx-field-error {
+    display: flex;
+    align-items: flex-start;
+    gap: 6px;
+
+    color: #be123c;
+    font-size: 13px;
+    font-weight: 600;
+    line-height: 1.4;
+
+    transition: opacity 180ms var(--ease-out), transform 180ms var(--ease-out);
+
+    @starting-style {
+        opacity: 0;
+        transform: translateY(-3px);
+    }
+}
+
+.nx-field-error::before {
+    content: "";
+    flex: none;
+    width: 15px;
+    height: 15px;
+    margin-top: 1px;
+
+    background: currentColor;
+    -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.2' stroke-linecap='round'%3E%3Ccircle cx='12' cy='12' r='9.5'/%3E%3Cpath d='M12 7.5v5.5M12 16.5v.01'/%3E%3C/svg%3E") center / contain no-repeat;
+    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.2' stroke-linecap='round'%3E%3Ccircle cx='12' cy='12' r='9.5'/%3E%3Cpath d='M12 7.5v5.5M12 16.5v.01'/%3E%3C/svg%3E") center / contain no-repeat;
+}
+
+.nx-field.has-aside > .nx-field-error {
+    grid-column: 1 / -1;
 }
 
 @media (hover: hover) and (pointer: fine) {
@@ -1085,7 +1110,6 @@ button:focus-visible {
     .nx-secondary,
     .nx-reveal,
     .nx-reveal svg,
-    .nx-nav a::after,
     .nx-caps,
     .nx-match,
     .nx-rule-icon path,
@@ -1107,14 +1131,53 @@ button:focus-visible {
     .nx-submit:disabled::before {
         animation-duration: 1.2s;
     }
+
+    .nx-fan {
+        animation: none;
+    }
 }
 
 
 /* ----- tablet: stack, card right under the headline ----- */
 
 @media (max-width: 1023px) {
+    /* sign-in / sign-up: the products panel covers the purple band, so
+       the drawing moves up behind the headline, in panel indigo */
     .nx-gpu-art {
         display: none;
+    }
+
+    .nx-hero {
+        position: relative;
+        isolation: isolate;
+    }
+
+    .nx-gpu-mark {
+        display: block;
+        position: absolute;
+        z-index: -1;
+        top: -36px;
+        right: -72px;
+
+        width: 440px;
+        color: var(--nx-panel);
+        opacity: 0.24;
+        transform: rotate(-10deg);
+        pointer-events: none;
+    }
+
+    /* reset / confirm: the purple band below the card is empty, so the
+       full drawing sits there in white */
+    [data-page="reset"] .nx-gpu-art,
+    [data-page="verify"] .nx-gpu-art {
+        display: block;
+        top: auto;
+        right: 50%;
+        bottom: 40px;
+
+        width: min(640px, 130vw);
+        opacity: 0.5;
+        transform: translateX(50%) rotate(-6deg);
     }
 
     .nx-backdrop {
@@ -1199,7 +1262,7 @@ button:focus-visible {
     /* compact pitch: title only, so the form starts near the top */
     [data-page] .nx-title {
         margin-bottom: 0;
-        font-size: 30px;
+        font-size: 36px;
     }
 
     .nx-lead {

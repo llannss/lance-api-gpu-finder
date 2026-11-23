@@ -78,15 +78,50 @@ function hideMessage() {
     document.querySelectorAll("[aria-invalid='true']").forEach((input) => {
         input.removeAttribute("aria-invalid");
     });
+
+    document.querySelectorAll(".nx-field-error").forEach((error) => {
+        error.hidden = true;
+    });
 }
 
-// Point at the field the error is about: mark it invalid and put the cursor there.
+// Point at the field the error is about: the message goes right under that
+// field (so it can't scroll out of view when the cursor jumps there), the
+// field is marked invalid, and the cursor moves to it. The top-of-card box
+// stays for server and connection errors.
 function flagField(input, text) {
-    showMessage(text);
-    if (!input) return;
+    if (!input) {
+        showMessage(text);
+        return;
+    }
+
+    const field = input.closest(".nx-field");
+    // the live "Passwords don't match" line already says it; don't repeat it
+    const saidAlready = field?.querySelector(".nx-match[data-state='bad']:not([hidden])");
+
+    if (field && !saidAlready) {
+        const id = `${input.id}-error`;
+        let error = document.getElementById(id);
+
+        if (!error) {
+            error = document.createElement("p");
+            error.className = "nx-field-error";
+            error.id = id;
+            error.setAttribute("role", "alert");
+            field.append(error);
+        }
+
+        error.textContent = text;
+        error.hidden = false;
+
+        const described = (input.getAttribute("aria-describedby") || "").split(" ").filter(Boolean);
+        if (!described.includes(id)) input.setAttribute("aria-describedby", [...described, id].join(" "));
+    } else if (!field) {
+        showMessage(text);
+    }
 
     input.setAttribute("aria-invalid", "true");
     input.focus();
+    window.nxShake?.();
 }
 
 
