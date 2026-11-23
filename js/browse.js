@@ -87,6 +87,10 @@ function setupBrowseEvents() {
         );
 
 
+    document.getElementById("vramFilter")
+        ?.addEventListener("change", applyBrowseFilters);
+
+
     sortSelect
         ?.addEventListener(
             "change",
@@ -152,8 +156,12 @@ async function loadBrowseGPUs() {
 function applyBrowseFilters() {
     const query = browseSearchInput.value.trim().toLowerCase();
     const sortValue = sortSelect.value;
+    const minVram = Number(document.getElementById("vramFilter")?.value || 0);
 
     filteredGPUs = allGPUs.filter((gpu) => {
+        // "16GB GDDR7" -> 16
+        if (minVram && getVramNumber(gpu.vram) < minVram) return false;
+
         if (!query) return true;
 
         const haystack = [
@@ -249,7 +257,7 @@ function renderBrowseGrid(gpus) {
     if (!gpus.length) {
         browseGpuGrid.innerHTML = `
             <div class="empty-state">
-                No GPUs matched your search.
+                No GPUs match your search and filters.
             </div>
         `;
         return;
