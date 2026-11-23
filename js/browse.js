@@ -87,8 +87,7 @@ function setupBrowseEvents() {
         );
 
 
-    document.getElementById("vramFilter")
-        ?.addEventListener("change", applyBrowseFilters);
+    setupFilterMenu();
 
 
     sortSelect
@@ -134,6 +133,8 @@ async function loadBrowseGPUs() {
                 query;
         }
 
+        buildFilterOptions(params.get("brand"));
+
 
         applyBrowseFilters();
 
@@ -156,11 +157,10 @@ async function loadBrowseGPUs() {
 function applyBrowseFilters() {
     const query = browseSearchInput.value.trim().toLowerCase();
     const sortValue = sortSelect.value;
-    const minVram = Number(document.getElementById("vramFilter")?.value || 0);
+    const filters = readFilters();
 
     filteredGPUs = allGPUs.filter((gpu) => {
-        // "16GB GDDR7" -> 16
-        if (minVram && getVramNumber(gpu.vram) < minVram) return false;
+        if (!matchesFilters(gpu, filters)) return false;
 
         if (!query) return true;
 
@@ -184,6 +184,7 @@ function applyBrowseFilters() {
 
     renderBrowseGrid(filteredGPUs);
     updateBrowseCount(filteredGPUs.length, query);
+    updateFilterSummary(filters, filteredGPUs.length);
 
     if (selectedGPU) {
         const stillVisible = filteredGPUs.find(
@@ -425,6 +426,168 @@ function renderDetailSpec(label, value) {
             <strong>${escapeHTML(value ?? "--")}</strong>
         </div>
     `;
+}
+
+// ============================================
+// FILTERS: dropdown with checklists + VRAM slider
+// ============================================
+
+// Each checklist and the GPU field it reads. Brand always lists the three
+// makers; the others list whatever the catalog has.
+const FILTER_GROUPS = [
+    { id: "filterBrand", key: "brand", always: ["NVIDIA", "AMD", "Intel"] },
+    { id: "filterArchitecture", key: "architecture" },
+    { id: "filterMemory", key: "memory_type" },
+];
+
+// Slider stops are the VRAM sizes that exist in the catalog, so every stop
+// changes the results (stop 0 = Any).
+let vramStops = [0];
+
+function setupFilterMenu() {
+    const menu = document.getElementById("filterMenu");
+    const toggle = document.getElementById("filterToggle");
+    const panel = document.getElementById("filterPanel");
+    if (!menu || !toggle || !panel) return;
+
+    const setOpen = (open) => {
+        menu.classList.toggle("is-open", open);
+        toggle.setAttribute("aria-expanded", String(open));
+        if (open) panel.querySelector("input:not(:disabled)")?.focus();
+    };
+
+    toggle.addEventListener("click", () => setOpen(!menu.classList.contains("is-open")));
+
+    document.getElementById("filterDone")?.addEventListener("click", () => {
+        setOpen(false);
+        toggle.focus();
+    });
+
+    document.getElementById("filterClear")?.addEventListener("click", () => {
+        panel.querySelectorAll('input[type="checkbox"]').forEach((box) => { box.checked = false; });
+        const range = document.getElementById("vramRange");
+        if (range) range.value = "0";
+        applyBrowseFilters();
+    });
+
+    // results update as boxes are ticked or the slider moves
+    panel.addEventListener("input", applyBrowseFilters);
+
+    // close on Escape or a click outside
+    document.addEventListener("keydown", (event) => {
+        if (event.key === "Escape" && menu.classList.contains("is-open")) {
+            setOpen(false);
+            toggle.focus();
+        }
+    });
+    document.addEventListener("click", (event) => {
+        if (menu.classList.contains("is-open") && !menu.contains(event.target)) setOpen(false);
+    });
+}
+
+// Fill the checklists from the loaded catalog. ?brand=AMD ticks that brand.
+function buildFilterOptions(brandFromUrl) {
+    for (const group of FILTER_GROUPS) {
+        const box = document.getElementById(group.id);
+        if (!box) continue;
+
+        const counts = new Map();
+        for (const name of group.always || []) counts.set(name, 0);
+        for (const gpu of allGPUs) {
+            const value = String(gpu[group.key] || "").trim();
+            if (!value) continue;
+            const known = [...counts.keys()].find((k) => k.toLowerCase() === value.toLowerCase());
+            const name = known || value;
+            counts.set(name, (counts.get(name) || 0) + 1);
+        }
+
+        // brands keep their fixed order; the rest go most common first
+        const entries = [...counts.entries()];
+        if (!group.always) entries.sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
+
+        box.replaceChildren(...entries.map(([value, count]) => {
+            const label = document.createElement("label");
+            label.className = "filter-option";
+
+            const input = document.createElement("input");
+            input.type = "checkbox";
+            input.name = group.key;
+            input.value = value;
+            // a brand the catalog doesn't carry yet can't be picked
+            input.disabled = count === 0;
+            input.checked = group.key === "brand" && count > 0
+                && value.toLowerCase() === String(brandFromUrl || "").toLowerCase();
+
+            const text = document.createElement("span");
+            text.textContent = value;
+
+            const num = document.createElement("span");
+            num.className = "filter-option-count";
+            num.textContent = count;
+
+            label.append(input, text, num);
+            return label;
+        }));
+    }
+
+    vramStops = [0, ...new Set(allGPUs.map((g) => getVramNumber(g.vram)).filter((n) => n > 0))]
+        .sort((a, b) => a - b);
+
+    const range = document.getElementById("vramRange");
+    if (range) {
+        range.max = String(vramStops.length - 1);
+        range.value = "0";
+        range.disabled = vramStops.length < 2;
+    }
+    const maxLabel = document.getElementById("vramMaxLabel");
+    if (maxLabel) maxLabel.textContent = `${vramStops[vramStops.length - 1]}GB`;
+}
+
+function readFilters() {
+    const checked = (key) => new Set(
+        [...document.querySelectorAll(`#filterPanel input[name="${key}"]:checked`)]
+            .map((box) => box.value.toLowerCase())
+    );
+
+    return {
+        brand: checked("brand"),
+        architecture: checked("architecture"),
+        memory_type: checked("memory_type"),
+        minVram: vramStops[Number(document.getElementById("vramRange")?.value || 0)] || 0,
+    };
+}
+
+// Nothing ticked in a list = no limit. Ticking several in one list shows
+// any of them (NVIDIA or AMD); different lists narrow each other.
+function matchesFilters(gpu, filters) {
+    for (const key of ["brand", "architecture", "memory_type"]) {
+        const picked = filters[key];
+        if (picked.size && !picked.has(String(gpu[key] || "").toLowerCase())) return false;
+    }
+    return !filters.minVram || getVramNumber(gpu.vram) >= filters.minVram;
+}
+
+// Badge on the Filters button, slider readout, "Show N GPUs" button.
+function updateFilterSummary(filters, count) {
+    const active = filters.brand.size + filters.architecture.size
+        + filters.memory_type.size + (filters.minVram ? 1 : 0);
+
+    const badge = document.getElementById("filterBadge");
+    if (badge) {
+        badge.hidden = active === 0;
+        badge.textContent = active;
+    }
+    document.getElementById("filterToggle")
+        ?.setAttribute("aria-label", active ? `Filters, ${active} active` : "Filters");
+
+    const value = document.getElementById("vramValue");
+    if (value) value.textContent = filters.minVram ? `${filters.minVram}GB or more` : "Any";
+
+    const done = document.getElementById("filterDone");
+    if (done) done.textContent = `Show ${count} GPU${count === 1 ? "" : "s"}`;
+
+    const clear = document.getElementById("filterClear");
+    if (clear) clear.disabled = active === 0;
 }
 
 function updateBrowseCount(count, query) {

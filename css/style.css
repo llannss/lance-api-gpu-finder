@@ -1417,6 +1417,7 @@ body.modal-open {
 
 .browse-header {
     display: flex;
+    flex-wrap: wrap;
     align-items: flex-end;
     justify-content: space-between;
     gap: 16px;
@@ -1435,13 +1436,20 @@ body.modal-open {
     font-size: 16px;
 }
 
-.browse-controls {
-    display: flex;
-    align-items: center;
-    gap: 12px;
+/* title keeps its line; the filters drop below it when space runs out */
+.browse-header > div:first-child {
+    flex: 1 1 280px;
 }
 
-.browse-controls span {
+.browse-controls {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+}
+
+/* only the GPU count, not spans inside the Filters menu */
+.browse-controls > span {
     color: var(--nx-muted);
 
     font-size: 14px;
@@ -1950,6 +1958,11 @@ body.modal-open {
     .browse-header {
         flex-direction: column;
         align-items: stretch;
+    }
+
+    /* the header stacks here, so the title's 280px basis would become height */
+    .browse-header > div:first-child {
+        flex: none;
     }
 
     .browse-controls {
@@ -5267,4 +5280,275 @@ html.auth-checking .app {
     display: inline-flex;
     align-items: center;
     gap: 6px;
+}
+
+/* ---------- Browse: Filters dropdown (checklists + VRAM slider) ---------- */
+
+.filter-menu {
+    position: relative;
+}
+
+.filter-toggle {
+    display: inline-flex;
+    height: 40px;
+    align-items: center;
+    gap: 8px;
+    padding: 0 12px 0 14px;
+
+    border: 1px solid var(--nx-line);
+    border-radius: 10px;
+    background: #fff;
+    color: var(--nx-ink);
+
+    font-size: 16px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: border-color 160ms ease, transform 160ms var(--ease-out);
+}
+
+.filter-toggle:hover {
+    border-color: var(--nx-accent-line);
+}
+
+.filter-toggle:active {
+    transform: scale(0.97);
+}
+
+.filter-menu.is-open .filter-toggle {
+    border-color: var(--nx-purple);
+}
+
+.filter-caret {
+    color: var(--nx-muted);
+    transition: transform 160ms var(--ease-out);
+}
+
+.filter-menu.is-open .filter-caret {
+    transform: rotate(180deg);
+}
+
+.filter-badge {
+    display: inline-grid;
+    min-width: 20px;
+    height: 20px;
+    place-items: center;
+    padding: 0 6px;
+    border-radius: 999px;
+    background: var(--nx-purple);
+    color: #fff;
+    font-size: 13px;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+}
+
+.filter-badge[hidden] {
+    display: none;
+}
+
+/* closed: invisible and out of the tab order; opens from the button's corner */
+.filter-panel {
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    z-index: 300;
+
+    /* two columns on desktop so the panel stays short */
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-areas:
+        "brand  arch"
+        "memory arch"
+        "vram   vram"
+        "foot   foot";
+    column-gap: 24px;
+    width: 480px;
+    max-height: min(75vh, 620px);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding: 4px 20px 0;
+
+    border: 1px solid var(--nx-line);
+    border-radius: 14px;
+    background: var(--nx-surface);
+    box-shadow: var(--nx-shadow-lg);
+
+    opacity: 0;
+    visibility: hidden;
+    transform: scale(0.97) translateY(-4px);
+    transform-origin: top right;
+    transition:
+        opacity 160ms var(--ease-out),
+        transform 160ms var(--ease-out),
+        visibility 0s linear 160ms;
+}
+
+.filter-menu.is-open .filter-panel {
+    opacity: 1;
+    visibility: visible;
+    transform: none;
+    transition:
+        opacity 180ms var(--ease-out),
+        transform 180ms var(--ease-out),
+        visibility 0s;
+}
+
+.filter-group {
+    min-width: 0;
+    margin: 0;
+    padding: 12px 0 8px;
+    border: 0;
+}
+
+.filter-group.is-brand { grid-area: brand; }
+.filter-group.is-arch { grid-area: arch; }
+.filter-group.is-memory { grid-area: memory; }
+
+.filter-group.is-vram {
+    grid-area: vram;
+    padding-top: 14px;
+    border-top: 1px solid var(--nx-line);
+}
+
+.filter-foot { grid-area: foot; }
+
+.filter-group legend,
+.filter-range-head label {
+    padding: 0;
+    margin-bottom: 6px;
+    color: var(--nx-ink);
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.filter-options {
+    display: grid;
+    gap: 2px;
+}
+
+.filter-option {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-height: 36px;
+    padding: 0 8px;
+    margin: 0 -8px;
+    border-radius: 8px;
+    color: var(--nx-ink);
+    font-size: 14px;
+    cursor: pointer;
+}
+
+.filter-option:hover {
+    background: var(--nx-sunken);
+}
+
+.filter-option input {
+    width: 18px;
+    height: 18px;
+    margin: 0;
+    accent-color: var(--nx-purple);
+    cursor: pointer;
+}
+
+.filter-option:has(input:disabled) {
+    color: var(--nx-faint);
+    cursor: default;
+}
+
+.filter-option:has(input:disabled):hover {
+    background: transparent;
+}
+
+.filter-option-count {
+    margin-left: auto;
+    color: var(--nx-muted);
+    font-size: 13px;
+    font-variant-numeric: tabular-nums;
+}
+
+.filter-range-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+.filter-range-head output {
+    color: var(--nx-purple);
+    font-size: 14px;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+}
+
+.filter-group input[type="range"] {
+    width: 100%;
+    margin: 6px 0 2px;
+    accent-color: var(--nx-purple);
+    cursor: pointer;
+}
+
+.filter-range-ends {
+    display: flex;
+    justify-content: space-between;
+    color: var(--nx-muted);
+    font-size: 13px;
+}
+
+/* stays visible while the lists scroll */
+.filter-foot {
+    position: sticky;
+    bottom: 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 12px 0 14px;
+    border-top: 1px solid var(--nx-line);
+    background: var(--nx-surface);
+}
+
+.filter-clear {
+    padding: 8px 4px;
+    border: 0;
+    background: transparent;
+    color: var(--nx-purple);
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.filter-clear:disabled {
+    color: var(--nx-faint);
+    cursor: default;
+}
+
+.filter-done {
+    height: 38px;
+    padding: 0 16px;
+    font-size: 14px;
+}
+
+@media (max-width: 700px) {
+    .filter-toggle {
+        width: 100%;
+    }
+
+    .filter-toggle .filter-caret {
+        margin-left: auto;
+    }
+
+    .filter-panel {
+        left: 0;
+        width: auto;
+        grid-template-columns: 1fr;
+        grid-template-areas: "brand" "arch" "memory" "vram" "foot";
+        transform-origin: top center;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .filter-panel,
+    .filter-caret {
+        transition: none;
+    }
 }

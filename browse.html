@@ -90,13 +90,49 @@
             <div class="browse-controls">
                 <span id="resultsCount">0 GPUs</span>
 
-                <select id="vramFilter" aria-label="Minimum VRAM">
-                    <option value="0">Any VRAM</option>
-                    <option value="8">8GB or more</option>
-                    <option value="12">12GB or more</option>
-                    <option value="16">16GB or more</option>
-                    <option value="24">24GB or more</option>
-                </select>
+                <!-- Filters: a dropdown with checklists and a VRAM slider (js/browse.js builds the lists) -->
+                <div class="filter-menu" id="filterMenu">
+                    <button type="button" class="filter-toggle" id="filterToggle" aria-expanded="false" aria-controls="filterPanel">
+                        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 6h16M7 12h10M10 18h4"/></svg>
+                        <span>Filters</span>
+                        <span class="filter-badge" id="filterBadge" hidden></span>
+                        <svg class="icon filter-caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+                    </button>
+
+                    <div class="filter-panel" id="filterPanel" role="group" aria-label="Filters">
+                        <fieldset class="filter-group is-brand">
+                            <legend>Brand</legend>
+                            <div class="filter-options" id="filterBrand"></div>
+                        </fieldset>
+
+                        <fieldset class="filter-group is-arch">
+                            <legend>Architecture</legend>
+                            <div class="filter-options" id="filterArchitecture"></div>
+                        </fieldset>
+
+                        <fieldset class="filter-group is-memory">
+                            <legend>Memory type</legend>
+                            <div class="filter-options" id="filterMemory"></div>
+                        </fieldset>
+
+                        <div class="filter-group is-vram">
+                            <div class="filter-range-head">
+                                <label for="vramRange">Minimum VRAM</label>
+                                <output id="vramValue" for="vramRange">Any</output>
+                            </div>
+                            <input type="range" id="vramRange" min="0" max="0" step="1" value="0">
+                            <div class="filter-range-ends" aria-hidden="true">
+                                <span id="vramMinLabel">Any</span>
+                                <span id="vramMaxLabel"></span>
+                            </div>
+                        </div>
+
+                        <div class="filter-foot">
+                            <button type="button" class="filter-clear" id="filterClear">Clear all</button>
+                            <button type="button" class="primary-btn filter-done" id="filterDone">Show GPUs</button>
+                        </div>
+                    </div>
+                </div>
 
                 <select id="sortSelect" aria-label="Sort GPUs">
                     <option value="newest">Newest First</option>
