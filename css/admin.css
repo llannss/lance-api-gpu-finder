@@ -3,20 +3,21 @@
 ========================================= */
 
 :root {
-    --blue: #0874f9;
-    --blue-dark: #0563d8;
-    --navy: #0b1c41;
-    --ink: #0b1c41;
-    --muted: #63718c;
-    --line: #e5ecf4;
-    --bg: #f3f6fb;
-    --card: #ffffff;
-    --danger: #c62828;
-    --ok-bg: #effaf3;
-    --ok-ink: #17663a;
-    --err-bg: #fff3f3;
-    --err-ink: #a12626;
-    --shadow: 0 4px 18px rgba(29, 64, 120, 0.07);
+    /* GPU Nexus tokens (nexus-tokens.css, loaded first) under the names this file uses */
+    --blue: var(--nx-purple);
+    --blue-dark: var(--nx-purple-hover);
+    --navy: var(--nx-ink);
+    --ink: var(--nx-ink);
+    --muted: var(--nx-muted);
+    --line: var(--nx-line);
+    --bg: var(--nx-page);
+    --card: var(--nx-surface);
+    --danger: var(--nx-danger);
+    --ok-bg: var(--nx-success-bg);
+    --ok-ink: var(--nx-success);
+    --err-bg: var(--nx-danger-bg);
+    --err-ink: var(--nx-danger);
+    --shadow: var(--nx-shadow-sm);
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -25,8 +26,9 @@ body {
     min-width: 320px;
     background: var(--bg);
     color: var(--ink);
-    font-family: Arial, Helvetica, sans-serif;
+    font-family: var(--nx-font);
     font-size: 14px;
+    -webkit-font-smoothing: antialiased;
 }
 
 button, input, select, textarea { font: inherit; color: inherit; }
@@ -61,19 +63,11 @@ button { cursor: pointer; }
     text-align: center;
 }
 
-.admin-gate-card h1 { margin: 12px 0 6px; font-size: 20px; }
+.admin-gate-card h1 { margin: 12px 0 6px; font-size: 20px; font-weight: 700; }
 .admin-gate-card p { margin-bottom: 18px; color: var(--muted); line-height: 1.5; }
 
-.admin-mark {
-    display: inline-grid;
-    width: 38px;
-    height: 38px;
-    place-items: center;
-    border-radius: 10px;
-    background: var(--blue);
-    color: #fff;
-    font-size: 20px;
-}
+.admin-mark { display: inline-grid; width: 36px; height: 36px; place-items: center; }
+.admin-mark svg { width: 36px; height: 36px; }
 
 /* ---------- buttons ---------- */
 
@@ -88,13 +82,15 @@ button { cursor: pointer; }
     border-radius: 8px;
     background: var(--blue);
     color: #fff;
-    font-size: 13px;
-    font-weight: 700;
+    font-size: 14px;
+    font-weight: 600;
     text-decoration: none;
+    transition: background-color 160ms ease, border-color 160ms ease, color 160ms ease, transform 160ms var(--ease-out);
     white-space: nowrap;
 }
 
 .admin-btn:hover { background: var(--blue-dark); }
+.admin-btn:active { transform: scale(0.97); }
 .admin-btn:disabled { opacity: 0.55; cursor: wait; }
 
 .admin-btn.is-ghost {
@@ -103,12 +99,16 @@ button { cursor: pointer; }
     color: var(--ink);
 }
 
-.admin-btn.is-ghost:hover { border-color: var(--blue); color: var(--blue); }
+.admin-btn.is-ghost:hover { border-color: var(--nx-accent-line); background: var(--nx-accent-tint); color: var(--blue); }
+
+/* Delete stays reachable but doesn't shout on every row; the dialog confirms */
+.admin-btn.is-danger-quiet { border-color: transparent; background: transparent; color: var(--muted); }
+.admin-btn.is-danger-quiet:hover { border-color: var(--nx-danger-line); background: var(--err-bg); color: var(--danger); }
 
 .admin-btn.is-danger { border-color: var(--danger); background: var(--danger); }
-.admin-btn.is-danger:hover { background: #a51f1f; }
+.admin-btn.is-danger:hover { filter: brightness(0.92); }
 
-.admin-btn.is-small { height: 30px; padding: 0 10px; font-size: 12px; }
+.admin-btn.is-small { height: 32px; padding: 0 10px; font-size: 13px; }
 
 .admin-icon-btn {
     width: 32px;
@@ -122,7 +122,7 @@ button { cursor: pointer; }
 
 .admin-icon-btn:hover { background: var(--bg); }
 
-:focus-visible { outline: 3px solid rgba(8, 116, 249, 0.35); outline-offset: 2px; }
+:focus-visible { outline: 3px solid rgba(109, 40, 217, 0.35); outline-offset: 2px; }
 
 /* ---------- top bar ---------- */
 
@@ -136,24 +136,21 @@ button { cursor: pointer; }
     align-items: center;
     justify-content: space-between;
     padding: 12px 24px;
-    background: var(--navy);
-    color: #fff;
+    border-bottom: 1px solid var(--line);
+    background: rgba(255, 255, 255, 0.92);
+    backdrop-filter: blur(8px);
+    color: var(--ink);
 }
 
 .admin-brand { display: flex; gap: 10px; align-items: center; }
-.admin-brand strong { display: block; font-size: 16px; }
-.admin-brand small { color: #9fb3d6; font-size: 11px; }
+.admin-brand strong { display: block; font-size: 16px; font-weight: 700; letter-spacing: -0.01em; }
+.admin-brand strong span { color: var(--nx-purple); }
+.admin-brand small { color: var(--muted); font-size: 13px; }
 
 .admin-user { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
-.admin-user > span { margin-right: 4px; color: #c9d6ee; font-size: 12px; }
+.admin-user > span { margin-right: 4px; color: var(--muted); font-size: 13px; overflow-wrap: anywhere; }
 
-.admin-top .admin-btn.is-ghost {
-    border-color: rgba(255, 255, 255, 0.25);
-    background: transparent;
-    color: #fff;
-}
 
-.admin-top .admin-btn.is-ghost:hover { border-color: #fff; }
 
 /* ---------- layout ---------- */
 
@@ -173,8 +170,8 @@ button { cursor: pointer; }
     background: var(--card);
 }
 
-.admin-stat span { display: block; font-size: 26px; font-weight: 800; }
-.admin-stat small { color: var(--muted); font-size: 12px; }
+.admin-stat span { display: block; font-size: 24px; font-weight: 700; font-variant-numeric: tabular-nums; letter-spacing: -0.01em; }
+.admin-stat small { color: var(--muted); font-size: 13px; }
 
 .admin-panel {
     border: 1px solid var(--line);
@@ -192,17 +189,22 @@ button { cursor: pointer; }
     border-bottom: 1px solid var(--line);
 }
 
-.admin-toolbar h1 { margin-right: auto; font-size: 18px; }
+.admin-toolbar h1,
+.admin-toolbar h2 { margin-right: auto; font-size: 20px; font-weight: 700; }
 
 .admin-toolbar input[type="search"] {
     width: min(320px, 100%);
     height: 36px;
     padding: 0 12px;
-    border: 1px solid var(--line);
+    border: 1px solid var(--nx-line-strong);
     border-radius: 8px;
+    font-size: 16px;
 }
 
-.admin-check { display: inline-flex; gap: 6px; align-items: center; color: var(--muted); font-size: 13px; }
+.admin-toolbar input[type="search"]:focus { border-color: var(--blue); outline: 3px solid rgba(109, 40, 217, 0.15); }
+
+.admin-check { display: inline-flex; gap: 6px; align-items: center; color: var(--muted); font-size: 14px; }
+.admin-check input { accent-color: var(--blue); }
 
 .admin-notice {
     margin: 14px 18px 0;
@@ -210,7 +212,7 @@ button { cursor: pointer; }
     border-radius: 8px;
     background: var(--ok-bg);
     color: var(--ok-ink);
-    font-size: 13px;
+    font-size: 14px;
 }
 
 .admin-notice.is-error { background: var(--err-bg); color: var(--err-ink); }
@@ -231,17 +233,16 @@ button { cursor: pointer; }
 }
 
 .admin-table th {
-    background: #f8fafd;
+    background: var(--nx-sunken);
     color: var(--muted);
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
+    font-size: 13px;
+    font-weight: 600;
 }
 
-.admin-table tbody tr:hover { background: #fafcff; }
-.admin-table td.admin-model { font-weight: 700; }
-.admin-table td.admin-model small { display: block; color: var(--muted); font-size: 11px; font-weight: 400; }
+.admin-table tbody tr:hover { background: var(--nx-sunken); }
+.admin-table td { font-variant-numeric: tabular-nums; }
+.admin-table td.admin-model { font-weight: 600; }
+.admin-table td.admin-model small { display: block; margin-top: 2px; color: var(--muted); font-size: 13px; font-weight: 400; }
 
 .admin-thumb {
     display: grid;
@@ -249,12 +250,13 @@ button { cursor: pointer; }
     height: 40px;
     place-items: center;
     overflow: hidden;
-    border: 1px solid var(--line);
     border-radius: 6px;
-    background: #f8fafd;
-    color: var(--muted);
-    font-size: 10px;
+    background: var(--nx-sunken);
+    color: var(--nx-faint);
 }
+
+.admin-thumb.is-empty { justify-items: start; padding-left: 8px; background: transparent; }
+.admin-thumb svg { width: 20px; height: 20px; }
 
 .admin-thumb img { width: 100%; height: 100%; object-fit: contain; }
 
@@ -271,11 +273,11 @@ button { cursor: pointer; }
     padding: 0;
     border: 0;
     border-radius: 14px;
-    box-shadow: 0 24px 60px rgba(11, 28, 65, 0.3);
+    box-shadow: var(--nx-shadow-lg);
 }
 
 .admin-dialog.is-small { width: min(420px, calc(100vw - 32px)); }
-.admin-dialog::backdrop { background: rgba(11, 28, 65, 0.45); }
+.admin-dialog::backdrop { background: rgba(15, 16, 53, 0.45); }
 
 .admin-dialog-head {
     display: flex;
@@ -285,7 +287,7 @@ button { cursor: pointer; }
     border-bottom: 1px solid var(--line);
 }
 
-.admin-dialog-head h2 { font-size: 17px; }
+.admin-dialog-head h2 { font-size: 20px; font-weight: 700; }
 
 .admin-dialog-foot {
     display: flex;
@@ -303,7 +305,7 @@ button { cursor: pointer; }
     border-radius: 8px;
     background: var(--err-bg);
     color: var(--err-ink);
-    font-size: 13px;
+    font-size: 14px;
     white-space: pre-line;
 }
 
@@ -316,8 +318,8 @@ button { cursor: pointer; }
 
 .admin-field { display: grid; gap: 5px; }
 .admin-field.is-wide { grid-column: 1 / -1; }
-.admin-field label { font-size: 12px; font-weight: 700; }
-.admin-field small { color: var(--muted); font-size: 11px; }
+.admin-field label { font-size: 14px; font-weight: 600; }
+.admin-field small { color: var(--muted); font-size: 13px; }
 
 .admin-field input,
 .admin-field select,
@@ -325,9 +327,10 @@ button { cursor: pointer; }
     width: 100%;
     min-height: 36px;
     padding: 7px 10px;
-    border: 1px solid var(--line);
+    border: 1px solid var(--nx-line-strong);
     border-radius: 8px;
     background: #fff;
+    font-size: 16px;
 }
 
 .admin-field textarea { min-height: 80px; resize: vertical; }
@@ -344,7 +347,9 @@ button { cursor: pointer; }
     .admin-main { padding: 14px; }
     .admin-top { padding: 12px 14px; }
     .admin-form-grid { grid-template-columns: 1fr; }
-    .admin-toolbar h1 { width: 100%; }
+    .admin-toolbar h1,
+    .admin-toolbar h2 { width: 100%; }
+    .admin-user > span { width: 100%; }
 }
 
 /* ---------- number boxes with units ---------- */
@@ -358,7 +363,7 @@ button { cursor: pointer; }
     background: #fff;
 }
 
-.admin-affix:focus-within { border-color: var(--blue); outline: 3px solid rgba(8, 116, 249, 0.15); }
+.admin-affix:focus-within { border-color: var(--blue); outline: 3px solid rgba(109, 40, 217, 0.15); }
 
 .admin-field .admin-affix input {
     min-width: 0;
@@ -372,10 +377,10 @@ button { cursor: pointer; }
     display: grid;
     place-items: center;
     padding: 0 10px;
-    background: #f3f6fb;
+    background: var(--nx-sunken);
     color: var(--muted);
-    font-size: 12px;
-    font-weight: 700;
+    font-size: 13px;
+    font-weight: 600;
     white-space: nowrap;
 }
 
@@ -389,7 +394,7 @@ button { cursor: pointer; }
 /* ---------- activity log ---------- */
 
 .admin-activity { margin-top: 18px; }
-.admin-muted { color: var(--muted); font-size: 12px; }
+.admin-muted { color: var(--muted); font-size: 13px; }
 .admin-more { padding: 12px 18px; text-align: center; }
 .admin-more:has(button[hidden]) { display: none; }
 
@@ -398,19 +403,19 @@ button { cursor: pointer; }
     padding: 3px 9px;
     border-radius: 999px;
     background: var(--bg);
-    font-size: 11px;
-    font-weight: 800;
+    font-size: 13px;
+    font-weight: 600;
 }
 
 .admin-action.is-create { background: var(--ok-bg); color: var(--ok-ink); }
-.admin-action.is-update { background: #eaf4ff; color: var(--blue-dark); }
+.admin-action.is-update { background: var(--nx-accent-tint); color: var(--blue-dark); }
 .admin-action.is-delete { background: var(--err-bg); color: var(--err-ink); }
-.admin-action.is-picture { background: #f3ecff; color: #6a3fb5; }
+.admin-action.is-picture { background: var(--nx-tint); color: var(--ink-soft, var(--nx-ink-soft)); }
 
 .admin-table td.admin-changes {
     max-width: 420px;
     color: var(--muted);
-    font-size: 12px;
+    font-size: 13px;
     line-height: 1.5;
     white-space: pre-line;
 }

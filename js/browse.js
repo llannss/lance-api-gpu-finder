@@ -291,7 +291,7 @@ function renderBrowseGrid(gpus) {
             </div>
 
             <div class="gpu-card-body">
-                <h3>${escapeHTML(`${brand} ${model}`)}</h3>
+                <h3>${escapeHTML(model)}</h3>
 
                 <p class="gpu-memory">
                     ${escapeHTML(vram)}

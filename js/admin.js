@@ -139,7 +139,7 @@ async function start() {
         account = data;
     } catch (error) {
         if (error.message === "Not signed in.") return;
-        showGate("Can't reach GPU Finder", "The API didn't answer. Try again in a moment.");
+        showGate("Can't reach GPU Nexus", "The API didn't answer. Try again in a moment.");
         return;
     }
 
@@ -222,7 +222,9 @@ function renderRows() {
         model.className = "admin-model";
         model.textContent = gpu.model;
         const brand = document.createElement("small");
-        brand.textContent = `${gpu.brand} · ${gpu.manufacturer}`;
+        // the maker is only worth showing when it differs from the brand (e.g. ASUS for NVIDIA)
+        brand.textContent = [gpu.brand, gpu.architecture, gpu.manufacturer && gpu.manufacturer !== gpu.brand ? gpu.manufacturer : ""]
+            .filter(Boolean).join(" · ");
         model.append(brand);
 
         row.insertCell().textContent = gpu.series;
@@ -241,7 +243,7 @@ function renderRows() {
         if (isBucketUrl(gpu.image_url)) {
             actions.append(button("Remove picture", "is-ghost", () => removePicture(gpu)));
         }
-        actions.append(button("Delete", "is-danger", () => confirmDelete(gpu)));
+        actions.append(button("Delete", "is-danger-quiet", () => confirmDelete(gpu)));
         row.insertCell().append(actions);
     }
 }
@@ -257,7 +259,9 @@ function thumbnail(gpu) {
         img.loading = "lazy";
         frame.append(img);
     } else {
-        frame.textContent = "None";
+        frame.classList.add("is-empty");
+        frame.title = "No picture yet";
+        frame.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="5" width="17" height="14" rx="2"/><circle cx="9" cy="10" r="1.6"/><path d="m20.5 16-4.5-4.5L7 19"/></svg><span class="visually-hidden">No picture</span>';
     }
     return frame;
 }

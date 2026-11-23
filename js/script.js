@@ -529,14 +529,14 @@ function createFeaturedGpuCard(gpu, badge) {
     card.innerHTML = `
         <div class="gpu-card-top">
 
-            <span
+            ${badge === false ? "<span></span>" : `<span
                 class="gpu-badge ${badge?.className || "badge-blue"}"
                 title="${escapeHTML(badge?.reason || "")}"
             >
                 ${escapeHTML(
                     badge?.text || "Featured"
                 )}
-            </span>
+            </span>`}
 
             <button
                 class="gpu-favorite ${
@@ -817,7 +817,7 @@ async function setupFavoritesPage() {
             return;
         }
         for (const gpu of saved) {
-            grid.append(createFeaturedGpuCard(gpu, { text: "Saved", className: "badge-blue", reason: "" }));
+            grid.append(createFeaturedGpuCard(gpu, false)); // the filled heart already says it is saved
         }
     };
 
@@ -1432,7 +1432,7 @@ function renderPerformanceChart(
                     pointRadius: 3,
                     pointHoverRadius: 5,
                     borderWidth: 2,
-                    tension: 0.28,
+                    tension: 0,
                     spanGaps: true
                 })
             );
@@ -3338,11 +3338,12 @@ function renderCompareVerdict(a, b) {
 
     const score = document.createElement("div");
     score.className = "compare-verdict-score";
+    const scored = total.A + total.B + (total.tie || 0);
     for (const [name, wins, side] of [[nameA, total.A, "A"], [nameB, total.B, "B"]]) {
         const pill = document.createElement("span");
         const leading = total[side] > total[side === "A" ? "B" : "A"];
         pill.className = "compare-verdict-pill" + (leading ? " is-leading" : "");
-        pill.textContent = `${name}: ${wins} win${wins === 1 ? "" : "s"}`;
+        pill.textContent = `${name} is better on ${wins} of ${scored} spec${scored === 1 ? "" : "s"}`;
         score.append(pill);
     }
     if (total.tie) {
@@ -3928,7 +3929,7 @@ function renderAnalyticsTrend(gpus) {
 
                     borderWidth: 2,
                     pointRadius: 3,
-                    tension: 0.3,
+                    tension: 0,
                     spanGaps: true
                 };
             }
@@ -4059,6 +4060,15 @@ function renderAnalyticsBrands(gpus) {
     );
 
 
+    // one brand fills the whole ring, so say it in words too
+    const brandNote = canvas.closest("article")?.querySelector(".analytics-card-header p, p");
+    const brands = Object.keys(counts);
+    if (brandNote) {
+        brandNote.textContent = brands.length === 1
+            ? `All ${gpus.length} GPUs in the catalog are ${brands[0]}.`
+            : "GPUs in the catalog.";
+    }
+
     analyticsBrandChart
         ?.destroy();
 
@@ -4084,11 +4094,10 @@ function renderAnalyticsBrands(gpus) {
                                     counts
                                 ),
 
-                            backgroundColor: [
-                                "#16b978",
-                                "#f14f56",
-                                "#2f7df6"
-                            ],
+                            backgroundColor:
+                                Object.keys(counts).map(
+                                    (brand) => BRAND_COLORS[brand] || "#9ca3af"
+                                ),
 
                             borderWidth: 0
                         }
@@ -5588,10 +5597,6 @@ function renderGpuDetailsPage(gpu) {
             <div class="gpu-page-section-header">
 
                 <div>
-
-                    <span>
-                        TECHNICAL DETAILS
-                    </span>
 
                     <h2>
                         Specifications

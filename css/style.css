@@ -2954,9 +2954,13 @@ body.modal-open {
     font-size: 24px;
     font-weight: 700;
 
-    text-overflow: ellipsis;
-    white-space: nowrap;
+    overflow-wrap: anywhere;
+    text-wrap: balance;
 }
+
+#analyticsLatestGpu { font-size: 20px; }
+
+.analytics-stat-icon svg { width: 22px; height: 22px; }
 
 
 .analytics-stat-card small {
@@ -4398,7 +4402,13 @@ html.auth-checking .app {
     white-space: nowrap;
 }
 
+/* admin picture controls sit under the picture, not beside it */
+.gpu-page-image:has(.gpu-image-admin) {
+    flex-direction: column;
+}
+
 .gpu-image-admin {
+    align-self: stretch;
     display: flex;
     flex-wrap: wrap;
     gap: 8px;
