@@ -4,30 +4,103 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="referrer" content="no-referrer">
-    <title>Confirm email - GPU Finder</title>
-    <link rel="stylesheet" href="css/style.css">
+    <title>Confirm email – GPU Nexus</title>
+    <meta name="theme-color" content="#f7f7fc">
+    <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+    <link rel="preload" href="assets/fonts/archivo-latin.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="stylesheet" href="css/nexus-auth.css">
 </head>
-<body class="auth-page" data-page="verify">
-    <main class="auth-card">
-        <a class="logo" href="index.html" aria-label="GPU Finder home">
-            <span class="logo-icon" aria-hidden="true">
-                <svg viewBox="0 0 60 53" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M17.2115 52.8962L20.7656 50.3033L19.5362 48.6181L20.7212 47.7536L23.1805 51.1247L37.9919 40.3192L35.5325 36.9481L59.2295 19.6601L44.8866 0L5.19331 28.958L3.55412 26.7112L0 29.3041L17.2115 52.8962Z" fill="#04375C"/>
-                </svg>
-            </span>
-            <span>
-                <strong>GPU Finder</strong>
-                <small>Find Your Next Upgrade</small>
-            </span>
-        </a>
+<body class="nx-page" data-page="verify">
+    <div class="nx-backdrop" aria-hidden="true">
+        <svg class="nx-gpu-art" viewBox="0 0 600 300" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <rect x="20" y="40" width="20" height="220" rx="3"/>
+            <rect x="25" y="70" width="10" height="34" rx="2"/>
+            <rect x="25" y="116" width="10" height="34" rx="2"/>
+            <rect x="25" y="162" width="10" height="24" rx="2"/>
+            <rect x="40" y="52" width="520" height="190" rx="18"/>
+            <path d="M300 70v154"/>
+            <rect x="490" y="30" width="40" height="22" rx="3"/>
+            <path d="M150 242v22h270v-22"/>
+            <path d="M162 264v-12M174 264v-12M186 264v-12M198 264v-12M210 264v-12M222 264v-12M234 264v-12M246 264v-12M258 264v-12M270 264v-12M282 264v-12M294 264v-12M306 264v-12M318 264v-12M330 264v-12M342 264v-12M354 264v-12M366 264v-12M378 264v-12M390 264v-12M402 264v-12M414 264v-12"/>
+            <g transform="translate(190 147)">
+                <circle r="78"/>
+                <g class="nx-fan">
+                    <path d="M0 -20C22 -38 44 -52 64 -46" transform="rotate(0)"/>
+                    <path d="M0 -20C22 -38 44 -52 64 -46" transform="rotate(45)"/>
+                    <path d="M0 -20C22 -38 44 -52 64 -46" transform="rotate(90)"/>
+                    <path d="M0 -20C22 -38 44 -52 64 -46" transform="rotate(135)"/>
+                    <path d="M0 -20C22 -38 44 -52 64 -46" transform="rotate(180)"/>
+                    <path d="M0 -20C22 -38 44 -52 64 -46" transform="rotate(225)"/>
+                    <path d="M0 -20C22 -38 44 -52 64 -46" transform="rotate(270)"/>
+                    <path d="M0 -20C22 -38 44 -52 64 -46" transform="rotate(315)"/>
+                </g>
+                <circle r="20"/>
+            </g>
+            <g transform="translate(410 147)">
+                <circle r="78"/>
+                <g class="nx-fan">
+                    <path d="M0 -20C22 -38 44 -52 64 -46" transform="rotate(0)"/>
+                    <path d="M0 -20C22 -38 44 -52 64 -46" transform="rotate(45)"/>
+                    <path d="M0 -20C22 -38 44 -52 64 -46" transform="rotate(90)"/>
+                    <path d="M0 -20C22 -38 44 -52 64 -46" transform="rotate(135)"/>
+                    <path d="M0 -20C22 -38 44 -52 64 -46" transform="rotate(180)"/>
+                    <path d="M0 -20C22 -38 44 -52 64 -46" transform="rotate(225)"/>
+                    <path d="M0 -20C22 -38 44 -52 64 -46" transform="rotate(270)"/>
+                    <path d="M0 -20C22 -38 44 -52 64 -46" transform="rotate(315)"/>
+                </g>
+                <circle r="20"/>
+            </g>
+        </svg>
+    </div>
 
-        <h1>Confirming your email</h1>
-        <p class="auth-lead" id="verifyLead">One moment...</p>
+    <header class="nx-header">
+        <div class="nx-brand">
+            <svg class="nx-chip" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+                <path d="M11 2.5v4M16 2.5v4M21 2.5v4M11 25.5v4M16 25.5v4M21 25.5v4M2.5 11h4M2.5 16h4M2.5 21h4M25.5 11h4M25.5 16h4M25.5 21h4" stroke="#1e1b4b" stroke-width="2" stroke-linecap="round"/>
+                <rect x="6.5" y="6.5" width="19" height="19" rx="4.5" fill="#f5f3ff" stroke="#1e1b4b" stroke-width="2"/>
+                <circle cx="16" cy="16" r="6" fill="#8b5cf6"/>
+                <path d="M16 16c0-2.4 1.1-3.9 3-4.3M16 16c2.1 1.2 2.8 3 2.1 4.8M16 16c-2.1 1.2-4 1.2-5.2-.3" stroke="#fff" stroke-width="1.5" stroke-linecap="round"/>
+                <circle cx="16" cy="16" r="1.3" fill="#fff"/>
+            </svg>
+            <span class="nx-wordmark">GPU <span>Nexus</span></span>
+        </div>
 
-        <p class="auth-message" id="authMessage" role="status" aria-live="polite" hidden></p>
+        <!-- what GPU Nexus includes; not links, since every product needs a sign-in first -->
+        <ul class="nx-nav" aria-label="GPU Nexus products">
+            <li>Finder</li>
+            <li>Guesser</li>
+            <li>Marketplace</li>
+        </ul>
+    </header>
 
-        <p class="auth-switch"><a href="signin.html">Go to sign in</a></p>
+    <main class="nx-layout is-focused">
+        <div class="nx-card">
+            <div class="nx-card-head">
+                <div class="nx-badge" aria-hidden="true">
+                    <svg data-for="default loading missing" viewBox="0 0 24 24" fill="none">
+                        <rect x="3" y="5" width="18" height="14" rx="2.5" stroke="currentColor" stroke-width="2"/>
+                        <path d="M3.8 7.2l8.2 6 8.2-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    <svg data-for="ok" viewBox="0 0 24 24" fill="none">
+                        <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2"/>
+                        <path d="M8 12.3l2.7 2.7L16 9.6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    <svg data-for="error" viewBox="0 0 24 24" fill="none">
+                        <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2"/>
+                        <path d="M12 7.5v5.5M12 16.5v.01" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
+                    </svg>
+                </div>
+                <h1>Confirming your email</h1>
+            </div>
+
+            <p class="nx-card-lead" id="verifyLead">Checking your link…</p>
+
+            <p class="auth-message" id="authMessage" role="status" aria-live="polite" hidden></p>
+
+            <a class="nx-secondary" href="signin.html">Go to sign in</a>
+        </div>
     </main>
 <script src="js/auth.js"></script>
+<script src="js/nexus-auth-ui.js"></script>
 </body>
 </html>
