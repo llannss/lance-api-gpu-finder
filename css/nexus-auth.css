@@ -1,74 +1,11 @@
 /* =========================================
    GPU Nexus — auth pages
-   signin.html, signup.html, reset.html and verify.html load only this file.
-   (The site CSP allows same-origin styles/fonts only, so system fonts.)
+   signin.html, signup.html, reset.html and verify.html load
+   nexus-tokens.css, then this file.
 ========================================= */
 
-/* Archivo: one variable file per subset covers weights 400–700.
-   Self-hosted because the CSP allows same-origin fonts only. */
-@font-face {
-    font-family: "Archivo";
-    font-style: normal;
-    font-weight: 400 700;
-    font-display: swap;
-    src: url("../assets/fonts/archivo-latin.woff2") format("woff2");
-    unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
-}
-
-@font-face {
-    font-family: "Archivo";
-    font-style: normal;
-    font-weight: 400 700;
-    font-display: swap;
-    src: url("../assets/fonts/archivo-latin-ext.woff2") format("woff2");
-    unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF;
-}
-
-/* Arial resized to Archivo's width, so text doesn't jump when the font arrives
-   (values set by measuring both faces in the browser) */
-@font-face {
-    font-family: "Archivo Fallback";
-    src: local("Arial");
-    size-adjust: 98.74%;     /* Archivo / Arial width on a sample line */
-    ascent-override: 89.1%;  /* Archivo's 0.88em ascent ÷ size-adjust */
-    descent-override: 21.3%; /* 0.21em ÷ size-adjust */
-    line-gap-override: 0%;
-}
-
-:root {
-    --nx-ink: #0f1035;
-    --nx-ink-soft: #2a2c4f;
-    --nx-muted: #5d6280;
-    --nx-faint: #8a8fab;
-    --nx-line: #e3e3f0;
-    --nx-page: #f7f7fc;
-    --nx-surface: #ffffff;
-    --nx-tint: #f1f0fb;
-
-    --nx-purple: #6d28d9;
-    --nx-purple-bright: #7c3aed;
-    --nx-blue: #2563eb;
-
-    --nx-radius-card: 24px;
-    --nx-radius-input: 12px;
-    --nx-font: "Archivo", "Archivo Fallback", Arial, sans-serif;
-
-    /* type roles (size / weight):
-       display  80 / 700                the hero line (sign-in and sign-up)
-       title    32 (focused 28) / 700   the card's h1
-       lead     20 / 400                 hero paragraph
-       body     16 / 400                 inputs, card lead, buttons (600)
-       label    14 / 600                 field labels, links beside fields
-       small    14 / 400                 product notes, messages
-       meta     13 / 600                 rule, match, Caps Lock, notes (400) */
-
-    /* spacing: a 4px scale. 4 / 8 / 12 / 16 / 20 / 24 / 28 / 32 / 40 / 48 / 72.
-       Tight inside a group (label → input 8), medium between fields (20),
-       generous between sections (24–32). */
-
-    /* motion: strong custom curves; the built-in ones are too weak */
-    --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
-}
+/* Font faces and shared values (colors, radii, font, motion) come from
+   nexus-tokens.css, which every page loads first. */
 
 * {
     box-sizing: border-box;
@@ -126,10 +63,6 @@ button {
 
 
 /* ----- background: one flat indigo panel with a GPU line drawing ----- */
-
-:root {
-    --nx-panel: #2f2794;
-}
 
 .nx-backdrop {
     position: absolute;

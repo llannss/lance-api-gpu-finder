@@ -1,0 +1,101 @@
+/* =========================================
+   GPU Nexus — design tokens
+   Loaded first by every page (auth pages and the Finder), so both halves of
+   the site share one font, one palette and one set of shared values.
+   Use the semantic names; don't paste hex values into page styles.
+========================================= */
+
+/* Archivo: one variable file per subset covers weights 400–700.
+   Self-hosted because the CSP allows same-origin fonts only. */
+@font-face {
+    font-family: "Archivo";
+    font-style: normal;
+    font-weight: 400 700;
+    font-display: swap;
+    src: url("../assets/fonts/archivo-latin.woff2") format("woff2");
+    unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+    font-family: "Archivo";
+    font-style: normal;
+    font-weight: 400 700;
+    font-display: swap;
+    src: url("../assets/fonts/archivo-latin-ext.woff2") format("woff2");
+    unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+/* Arial resized to Archivo's width, so text doesn't jump when the font arrives
+   (values set by measuring both faces in the browser) */
+@font-face {
+    font-family: "Archivo Fallback";
+    src: local("Arial");
+    size-adjust: 98.74%;     /* Archivo / Arial width on a sample line */
+    ascent-override: 89.1%;  /* Archivo's 0.88em ascent ÷ size-adjust */
+    descent-override: 21.3%; /* 0.21em ÷ size-adjust */
+    line-gap-override: 0%;
+}
+
+:root {
+    /* ----- text and surfaces ----- */
+    --nx-ink: #0f1035;          /* headings, primary text (16.9:1 on white) */
+    --nx-ink-soft: #2a2c4f;     /* body text, nav (13.6:1) */
+    --nx-muted: #5d6280;        /* secondary text, captions (5.9:1); the lightest text color */
+    --nx-faint: #8a8fab;        /* icons and disabled marks only, never text (3.2:1) */
+    --nx-line: #e3e3f0;         /* borders, dividers */
+    --nx-line-strong: #cfcfe3;  /* hovered borders, inputs */
+    --nx-page: #f7f7fc;         /* page background */
+    --nx-surface: #ffffff;      /* cards, panels, inputs */
+    --nx-sunken: #fbfaff;       /* a step off white: image wells, table stripes */
+    --nx-tint: #f1f0fb;         /* quiet hover / selected background */
+
+    /* ----- brand ----- */
+    --nx-purple: #6d28d9;        /* primary actions (white text 7.1:1) */
+    --nx-purple-hover: #5b21b6;  /* primary action, hovered */
+    --nx-purple-bright: #7c3aed; /* links, focus rings, active marks (5.7:1) */
+    --nx-accent-tint: #ede9fe;   /* accent background: active nav, chips */
+    --nx-accent-line: #ddd6fe;   /* accent border */
+    --nx-panel: #2f2794;         /* the indigo brand panel */
+    --nx-blue: #2563eb;          /* secondary icon color */
+
+    /* ----- status ----- */
+    --nx-danger: #be123c;
+    --nx-danger-bg: #fff1f2;
+    --nx-danger-line: #f5c2c7;
+    --nx-success: #15803d;
+    --nx-success-bg: #effaf3;
+    --nx-success-line: #bbe5cb;
+    --nx-warning: #9a5b00;
+    --nx-warning-bg: #fff8e1;
+    --nx-warning-line: #f0d38a;
+
+    /* ----- depth ----- */
+    --nx-shadow-sm: 0 1px 2px rgba(15, 16, 53, 0.06);
+    --nx-shadow-md: 0 4px 18px rgba(15, 16, 53, 0.07);
+    --nx-shadow-lg: 0 24px 48px -28px rgba(15, 16, 53, 0.45);
+
+    /* ----- shape ----- */
+    --nx-radius-sm: 8px;
+    --nx-radius-md: 12px;
+    --nx-radius-lg: 18px;
+    --nx-radius-card: 24px;
+    --nx-radius-input: 12px;
+
+    /* ----- type ----- */
+    --nx-font: "Archivo", "Archivo Fallback", Arial, sans-serif;
+
+    /* type roles (size / weight):
+       display  80 / 700   page hero line
+       title    32 / 700   page or card h1
+       lead     20 / 400   intro paragraph
+       body     16 / 400   text, inputs, buttons (600)
+       label    14 / 600   field labels, small links
+       small    14 / 400   notes, messages
+       meta     13 / 600   badges, rules, hints */
+
+    /* spacing: a 4px scale. 4 / 8 / 12 / 16 / 20 / 24 / 28 / 32 / 40 / 48 / 72.
+       Tight inside a group, medium between items, generous between sections. */
+
+    /* ----- motion: strong custom curve; the built-in ones are too weak ----- */
+    --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+}

@@ -4,9 +4,11 @@
     <meta charset="UTF-8">
     <meta
         name="viewport"
-        content="width=device-width, initial-scale=1.0"
+        content="width=device-width, initial-scale=1.0, viewport-fit=cover"
     >
-    <title>Browse GPUs - GPU Finder</title>
+    <title>Browse GPUs – GPU Nexus</title>
+    <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="css/nexus-tokens.css">
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
@@ -16,59 +18,32 @@
     <aside class="sidebar">
 
     <!-- LOGO -->
-    <a href="index.html" class="logo">
-
-        <div class="logo-icon">
-            <svg
-                viewBox="0 0 60 53"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-            >
-                <path
-                    d="M17.2115 52.8962L20.7656 50.3033L19.5362 48.6181L20.7212 47.7536L23.1805 51.1247L37.9919 40.3192L35.5325 36.9481L59.2295 19.6601L44.8866 0L5.19331 28.958L3.55412 26.7112L0 29.3041L17.2115 52.8962Z"
-                    fill="#04375C"
-                />
-            </svg>
-        </div>
-
-        <div class="logo-text">
-            <h1>GPU Finder</h1>
-            <p>Find Your Next Upgrade</p>
-        </div>
-
-    </a>
+    <a class="logo" href="index.html" aria-label="GPU Nexus Finder, home">
+            <span class="logo-icon" aria-hidden="true">
+                <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M11 2.5v4M16 2.5v4M21 2.5v4M11 25.5v4M16 25.5v4M21 25.5v4M2.5 11h4M2.5 16h4M2.5 21h4M25.5 11h4M25.5 16h4M25.5 21h4" stroke="#1e1b4b" stroke-width="2" stroke-linecap="round"/>
+                    <rect x="6.5" y="6.5" width="19" height="19" rx="4.5" fill="#f5f3ff" stroke="#1e1b4b" stroke-width="2"/>
+                    <circle cx="16" cy="16" r="6" fill="#8b5cf6"/>
+                    <path d="M16 16c0-2.4 1.1-3.9 3-4.3M16 16c2.1 1.2 2.8 3 2.1 4.8M16 16c-2.1 1.2-4 1.2-5.2-.3" stroke="#fff" stroke-width="1.5" stroke-linecap="round"/>
+                    <circle cx="16" cy="16" r="1.3" fill="#fff"/>
+                </svg>
+            </span>
+            <span class="logo-text">
+                <strong>GPU <span>Nexus</span></strong>
+                <small>Finder</small>
+            </span>
+        </a>
 
 
     <!-- NAVIGATION -->
-    <nav class="sidebar-nav">
-
-        <a href="index.html" class="nav-link">
-            <span class="nav-icon">⌂</span>
-            <span>Home</span>
-        </a>
-
-        <a href="browse.html" class="nav-link active">
-            <span class="nav-icon">◉</span>
-            <span>Browse GPUs</span>
-        </a>
-
-        <a href="compare.html" class="nav-link">
-            <span class="nav-icon">⇄</span>
-            <span>Compare</span>
-        </a>
-
-        <a href="analytics.html" class="nav-link">
-            <span class="nav-icon">⌁</span>
-            <span>Analytics</span>
-        </a>
-
-        <a href="rankings.html" class="nav-link">
-            <span class="nav-icon">♜</span>
-            <span>Rankings</span>
-        </a>
-
-        <a href="favorites.html" class="nav-link"><span class="nav-icon">♥</span>Favorites</a>
-        </nav>
+    <nav class="sidebar-nav" aria-label="Sections">
+        <a href="index.html" class="nav-link"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 10.5 12 4l8 6.5V19a1 1 0 0 1-1 1h-4.5v-5.5h-5V20H5a1 1 0 0 1-1-1z"/></svg><span>Home</span></a>
+        <a href="browse.html" class="nav-link active" aria-current="page"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="4" width="6.5" height="6.5" rx="1.5"/><rect x="13.5" y="4" width="6.5" height="6.5" rx="1.5"/><rect x="4" y="13.5" width="6.5" height="6.5" rx="1.5"/><rect x="13.5" y="13.5" width="6.5" height="6.5" rx="1.5"/></svg><span>Browse GPUs</span></a>
+        <a href="compare.html" class="nav-link"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 4v16M17 4v16M4 8h6M14 16h6"/><path d="M4 8l3-3 3 3M14 16l3 3 3-3"/></svg><span>Compare</span></a>
+        <a href="analytics.html" class="nav-link"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg><span>Analytics</span></a>
+        <a href="rankings.html" class="nav-link"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 4h8v5a4 4 0 0 1-8 0z"/><path d="M8 6H5v1.5A3.5 3.5 0 0 0 8.5 11M16 6h3v1.5a3.5 3.5 0 0 1-3.5 3.5M12 13v4M8.5 20h7l-1-3h-5z"/></svg><span>Rankings</span></a>
+        <a href="favorites.html" class="nav-link"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/></svg><span>Favorites</span></a>
+    </nav>
 
 </aside>
 
@@ -104,7 +79,7 @@
 
         <section class="browse-header">
             <div>
-                <h2>Browse GPUs</h2>
+                <h1>Browse GPUs</h1>
                 <p>
                     Search, filter, sort, and inspect graphics cards from
                     NVIDIA, AMD, and Intel.
@@ -130,6 +105,7 @@
 
             <!-- LEFT SIDE -->
             <div class="browse-catalog">
+                <h2 class="visually-hidden">All GPUs</h2>
                 <div class="gpu-grid browse-gpu-grid" id="browseGpuGrid"></div>
             </div>
 
@@ -169,6 +145,15 @@
     </main>
 
 </div>
+
+<!-- phone navigation: shown below 700px, where the sidebar is hidden -->
+<nav class="tabbar" aria-label="Sections">
+    <a href="index.html" class="tabbar-link"><svg class="tabbar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 10.5 12 4l8 6.5V19a1 1 0 0 1-1 1h-4.5v-5.5h-5V20H5a1 1 0 0 1-1-1z"/></svg><span>Home</span></a>
+    <a href="browse.html" class="tabbar-link active" aria-current="page"><svg class="tabbar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="4" width="6.5" height="6.5" rx="1.5"/><rect x="13.5" y="4" width="6.5" height="6.5" rx="1.5"/><rect x="4" y="13.5" width="6.5" height="6.5" rx="1.5"/><rect x="13.5" y="13.5" width="6.5" height="6.5" rx="1.5"/></svg><span>Browse</span></a>
+    <a href="compare.html" class="tabbar-link"><svg class="tabbar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 4v16M17 4v16M4 8h6M14 16h6"/><path d="M4 8l3-3 3 3M14 16l3 3 3-3"/></svg><span>Compare</span></a>
+    <a href="rankings.html" class="tabbar-link"><svg class="tabbar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 4h8v5a4 4 0 0 1-8 0z"/><path d="M8 6H5v1.5A3.5 3.5 0 0 0 8.5 11M16 6h3v1.5a3.5 3.5 0 0 1-3.5 3.5M12 13v4M8.5 20h7l-1-3h-5z"/></svg><span>Rankings</span></a>
+    <a href="analytics.html" class="tabbar-link"><svg class="tabbar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg><span>Analytics</span></a>
+</nav>
 
 <script src="js/browse.js"></script>
 <script src="js/script.js"></script>

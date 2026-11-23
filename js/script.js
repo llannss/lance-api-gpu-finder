@@ -250,7 +250,7 @@ async function signOutHere() {
 }
 
 async function signOutEverywhere() {
-    if (!confirm("Sign out of GPU Finder on every device?")) return;
+    if (!confirm("Sign out of GPU Nexus on every device?")) return;
 
     try {
         await apiFetch("/auth/logout-all", { method: "POST" });
@@ -353,11 +353,10 @@ function renderDashboardError() {
         gpuGrid.innerHTML = `
             <div class="empty-state">
                 <div>
-                    <strong>Unable to load GPU data.</strong>
+                    <strong>Couldn't load the GPU catalog.</strong>
 
                     <p>
-                        Check the API deployment and API key,
-                        then try again.
+                        Check your connection, then try again.
                     </p>
 
                     <button
@@ -410,7 +409,7 @@ const FEATURE_PICKS = [
         reason: (g) => `${(bandwidthOf(g) / priceOf(g)).toFixed(2)} GB/s of bandwidth per dollar`
     },
     {
-        text: "Great for Creators",
+        text: "Creator Pick",
         className: "badge-purple",
         // Video, 3D and AI work need memory: most VRAM, then bandwidth.
         pick: (pool) => maxBy(pool, (g) => [parseVramGb(g.vram) || 0, bandwidthOf(g)]),
@@ -481,7 +480,7 @@ function renderFeaturedGPUs(gpus) {
     if (!gpus.length) {
         gpuGrid.innerHTML = `
             <div class="empty-state">
-                No GPUs found in the API.
+                The GPU catalog is empty right now.
             </div>
         `;
 
@@ -574,7 +573,7 @@ function createFeaturedGpuCard(gpu, badge) {
         <div class="gpu-card-body">
 
             <h3>
-                ${escapeHTML(`${brand} ${model}`)}
+                ${escapeHTML(model)}
             </h3>
 
             <p class="gpu-memory">
@@ -1127,10 +1126,26 @@ function renderBrandOverview(gpus) {
 
             setText(
                 ids.platform,
-                highest
-                    ? getPlatform(highest)
-                    : "--"
+                highest?.architecture || "--"
             );
+
+            // A brand with no GPUs in the catalog says so instead of six "--"
+            const card = document.querySelector(
+                `.brand-card[data-brand="${brand === "INTEL" ? "Intel" : brand}"]`
+            );
+
+            if (card) {
+                card.classList.toggle("is-empty", !highest);
+
+                let note = card.querySelector(".brand-empty");
+                if (!highest && !note) {
+                    note = document.createElement("p");
+                    note.className = "brand-empty";
+                    note.textContent = `No ${brand === "INTEL" ? "Intel" : brand} GPUs in the catalog yet.`;
+                    card.append(note);
+                }
+                if (note) note.hidden = Boolean(highest);
+            }
         }
     );
 }
@@ -2015,6 +2030,12 @@ function setupGeminiChat() {
     }
 
     const conversation = [];
+
+    // "Ask a question" on the home page opens the same chat as the character
+    document.querySelector("[data-open-chat]")?.addEventListener("click", () => {
+        // the character button toggles; only open, never close, from here
+        if (!miniChat.classList.contains("show")) helpButton.click();
+    });
 
     helpButton.addEventListener(
         "click",
@@ -5682,7 +5703,7 @@ function renderGpuDetailsPage(gpu) {
 
 
     document.title =
-        `${gpu.model || "GPU"} - GPU Finder`;
+        `${gpu.model || "GPU"} – GPU Nexus`;
 }
 
 function createGpuPageSpec(
