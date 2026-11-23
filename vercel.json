@@ -1,10 +1,17 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "cleanUrls": false,
+  "redirects": [
+    { "source": "/arena", "destination": "/arena/", "permanent": false }
+  ],
   "rewrites": [
     {
       "source": "/api/:path*",
       "destination": "https://lance-api-murex.vercel.app/:path*"
+    },
+    {
+      "source": "/arena/:path*",
+      "destination": "https://lance-api-gpu-guessr.vercel.app/:path*"
     },
     {
       "source": "/admin",

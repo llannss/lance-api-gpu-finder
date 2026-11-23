@@ -19,6 +19,7 @@ const ICON_PATHS = {
     star: '<path d="m12 3.8 2.5 5.1 5.6.8-4 3.9.9 5.6-5-2.6-5 2.6.9-5.6-4-3.9 5.6-.8z"/>',
     swap: '<path d="M7 4v16M4 7l3-3 3 3M17 20V4M14 17l3 3 3-3"/>',
     logout: '<path d="M14 4h4a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-4M10 16l-4-4 4-4M6 12h10"/>',
+    gamepad: '<rect x="2.5" y="7" width="19" height="11" rx="4"/><path d="M7 10.5v4M5 12.5h4M15.5 11.5h.01M18 13.5h.01"/>',
     devices: '<rect x="3" y="5" width="13" height="10" rx="1.5"/><path d="M7 19h5M9.5 15v4"/><rect x="17.5" y="9" width="4" height="10" rx="1"/>'
 };
 
@@ -229,6 +230,8 @@ function renderAccountBox(account) {
         item("My favorites", "heart", { href: "favorites.html" }, { badgeId: "favoriteCount" }),
         item("Recently viewed", "clock", { href: "index.html#recentPanel" }),
         item("Saved comparisons", "star", { href: "compare.html#savedComparisons" }),
+        divider(),
+        item("Play GPU Guessr", "gamepad", { href: "/arena/" }),
         divider(),
         item("Sign out", "logout", signOutHere),
         item("Sign out on all devices", "devices", signOutEverywhere, { danger: true })

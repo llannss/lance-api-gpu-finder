@@ -177,6 +177,9 @@ function setBusy(form, busy, busyLabel) {
 function safeNext() {
     const next = new URLSearchParams(location.search).get("next") || "";
     if (next === "admin/") return "admin/";
+    // GPU Guessr lives at /arena/ (a rewrite to its own project); keep a
+    // challenge link's ?mode=…&seed=… so the friend lands on the same run
+    if (/^arena\/(\?[^#\s]*)?$/.test(next)) return next;
     return /^[a-z0-9-]+\.html(\?[^#\s]*)?$/i.test(next) ? next : "index.html";
 }
 

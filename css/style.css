@@ -5643,3 +5643,19 @@ html.auth-checking .app {
 .gpu-page-image.has-missing-image:has(.gpu-image-admin) {
     justify-content: flex-end;
 }
+
+/* ---------- the other GPU Nexus sites, under the sections ---------- */
+
+.sidebar-apps {
+    margin-top: 14px;
+    padding-top: 14px;
+    border-top: 1px solid var(--nx-line);
+}
+
+/* Marketplace isn't built yet: shown, but not a link */
+.nav-link.is-plain,
+.nav-link.is-plain:hover {
+    background: transparent;
+    color: var(--nx-muted);
+    cursor: default;
+}
