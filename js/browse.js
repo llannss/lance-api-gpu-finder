@@ -158,6 +158,7 @@ function applyBrowseFilters() {
     const query = browseSearchInput.value.trim().toLowerCase();
     const sortValue = sortSelect.value;
     const filters = readFilters();
+    browseLimit = BROWSE_PAGE;   // new search or filters start from the top
 
     filteredGPUs = allGPUs.filter((gpu) => {
         if (!matchesFilters(gpu, filters)) return false;
@@ -252,6 +253,11 @@ function sortGPUs(gpus, sortValue) {
     return list;
 }
 
+// Render 48 cards at a time; a big catalog would otherwise build every card
+// (1,000 GPUs = 14,000 elements) on each keystroke in search.
+const BROWSE_PAGE = 48;
+let browseLimit = BROWSE_PAGE;
+
 function renderBrowseGrid(gpus) {
     browseGpuGrid.innerHTML = "";
 
@@ -264,7 +270,7 @@ function renderBrowseGrid(gpus) {
         return;
     }
 
-    gpus.forEach((gpu) => {
+    gpus.slice(0, browseLimit).forEach((gpu) => {
         const card = document.createElement("article");
         card.className = "gpu-card";
 
@@ -335,6 +341,31 @@ function renderBrowseGrid(gpus) {
 
         browseGpuGrid.appendChild(card);
     });
+
+    const left = gpus.length - browseLimit;
+    if (left > 0) {
+        const more = document.createElement("div");
+        more.className = "browse-more";
+
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "browse-more-button";
+        button.textContent = `Show ${Math.min(BROWSE_PAGE, left)} more`;
+
+        const note = document.createElement("span");
+        note.textContent = `Showing ${browseLimit.toLocaleString()} of ${gpus.length.toLocaleString()}`;
+
+        button.addEventListener("click", () => {
+            const firstNew = browseLimit;
+            browseLimit += BROWSE_PAGE;
+            renderBrowseGrid(gpus);
+            // keyboard users land on the first new card, not back at the top
+            browseGpuGrid.querySelectorAll(".gpu-details-button")[firstNew]?.focus({ preventScroll: true });
+        });
+
+        more.append(button, note);
+        browseGpuGrid.appendChild(more);
+    }
 }
 
 function openDetailsSidebar(gpu) {
@@ -375,9 +406,7 @@ function openDetailsSidebar(gpu) {
                 >${iconSVG("heart")}</button>
             </div>
 
-            <p class="details-series">
-                ${escapeHTML(gpu.series || "--")}
-            </p>
+            ${gpu.series ? `<p class="details-series">${escapeHTML(gpu.series)}</p>` : ""}
 
             <p class="details-description">
                 ${escapeHTML(gpu.description || "No description available.")}
@@ -619,9 +648,9 @@ function updateBrowseCount(count, query) {
     if (!resultsCount) return;
 
     if (query) {
-        resultsCount.textContent = `${count} result${count !== 1 ? "s" : ""} for "${query}"`;
+        resultsCount.textContent = `${count.toLocaleString()} result${count !== 1 ? "s" : ""} for "${query}"`;
     } else {
-        resultsCount.textContent = `${count} GPU${count !== 1 ? "s" : ""}`;
+        resultsCount.textContent = `${count.toLocaleString()} GPU${count !== 1 ? "s" : ""}`;
     }
 }
 
@@ -631,9 +660,9 @@ function getPriceNumber(gpu) {
     return Number.isFinite(numeric) ? numeric : 0;
 }
 
+// same rules as parseVramGb in script.js: "512MB DDR3" is 0.5GB, not 512
 function getVramNumber(vram) {
-    const match = String(vram || "").match(/(\d+(\.\d+)?)/);
-    return match ? Number(match[1]) : 0;
+    return parseVramGb(vram);
 }
 
 function getBrowseReleaseTimestamp(

@@ -43,14 +43,30 @@ const $ = (id) => document.getElementById(id);
 // signed-out visitor never sees an empty page flash before the redirect.
 document.documentElement.classList.add("auth-checking");
 
-// Hide product images that fail to load. One listener replaces inline
-// onerror="" attributes, which the Content-Security-Policy blocks.
+// Text cut short with an ellipsis or a line clamp (long model names on the
+// podium, in tables, in Recently viewed) shows its full text on hover.
+document.addEventListener(
+    "pointerover",
+    (event) => {
+        const el = event.target;
+        if (!(el instanceof HTMLElement) || el.title || el.children.length) return;
+        const cut = el.scrollWidth > el.clientWidth + 1 || el.scrollHeight > el.clientHeight + 1;
+        if (cut && el.textContent.trim()) el.title = el.textContent.trim().replace(/\s+/g, " ");
+    },
+    { passive: true }
+);
+
+// Any GPU picture that fails to load is hidden, and its frame shows the
+// drawn picture icon instead of the browser's broken-image icon and alt
+// text. One listener replaces inline onerror="", which the CSP blocks.
 document.addEventListener(
     "error",
     (event) => {
-        if (event.target instanceof HTMLImageElement && event.target.hasAttribute("data-hide-on-error")) {
-            event.target.style.display = "none";
-        }
+        const img = event.target;
+        if (!(img instanceof HTMLImageElement)) return;
+        if (img.closest(".profile-menu, .logo")) return;
+        img.style.display = "none";
+        img.parentElement?.classList.add("has-missing-image");
     },
     true
 );
@@ -324,12 +340,25 @@ async function requestGPUs() {
         );
     }
 
-    if (Array.isArray(data)) return data;
-    if (Array.isArray(data.gpus)) return data.gpus;
-    if (Array.isArray(data.data)) return data.data;
-    if (Array.isArray(data.results)) return data.results;
+    const list =
+        (Array.isArray(data) && data) ||
+        (Array.isArray(data.gpus) && data.gpus) ||
+        (Array.isArray(data.data) && data.data) ||
+        (Array.isArray(data.results) && data.results) ||
+        [];
 
-    return [];
+    return list.map(normalizeGpu);
+}
+
+// Clean up values the catalog can hold but the pages shouldn't show as fact:
+// a launch price of 0 or less means "unknown", not free.
+function normalizeGpu(gpu) {
+    if (!gpu || typeof gpu !== "object") return gpu;
+    const price = Number(gpu.launch_price_usd);
+    if (gpu.launch_price_usd != null && !(price > 0)) {
+        return { ...gpu, launch_price_usd: null };
+    }
+    return gpu;
 }
 
 
@@ -791,7 +820,7 @@ function getLaunchPrice(gpu) {
             gpu.msrp
         );
 
-    return Number.isFinite(numeric)
+    return Number.isFinite(numeric) && numeric > 0
         ? `$${numeric.toLocaleString()}`
         : "Price unavailable";
 }
@@ -1236,17 +1265,23 @@ function renderBrandOverview(gpus) {
 }
 
 
+// "24GB GDDR6X" -> 24, "512MB DDR3" -> 0.5, "1.5 GB" -> 1.5, 12 -> 12
 function parseVramGb(value) {
     const match =
         String(
             value ?? ""
         ).match(
-            /(\d+(?:\.\d+)?)/
+            /(\d+(?:\.\d+)?)\s*(TB|GB|MB)?/i
         );
 
-    return match
-        ? Number(match[1])
-        : 0;
+    if (!match) return 0;
+
+    const amount = Number(match[1]);
+    const unit = (match[2] || "GB").toUpperCase();
+
+    if (unit === "MB") return amount / 1024;
+    if (unit === "TB") return amount * 1024;
+    return amount;
 }
 
 
@@ -1674,6 +1709,9 @@ function parseNumber(value) {
 
 
 function numberOrNull(value) {
+    // Number(null) is 0, which would plot a missing spec as a real zero
+    if (value === null || value === undefined || value === "") return null;
+
     const number =
         Number(value);
 
@@ -3036,17 +3074,9 @@ function renderCompareSelected(
                     )}
                 </h3>
 
-                <p class="compare-gpu-series">
-                    ${escapeHTML(
-                        gpu.series || "--"
-                    )}
-                </p>
+                ${gpu.series ? `<p class="compare-gpu-series">${escapeHTML(gpu.series)}</p>` : ""}
 
-                <p class="compare-gpu-memory">
-                    ${escapeHTML(
-                        gpu.vram || "--"
-                    )}
-                </p>
+                ${gpu.vram ? `<p class="compare-gpu-memory">${escapeHTML(gpu.vram)}</p>` : ""}
 
                 <div class="compare-gpu-price">
                     ${escapeHTML(
@@ -3121,7 +3151,7 @@ const COMPARE_ROWS = [
     {
         label: "Launch Price",
         value: (gpu) => getLaunchPrice(gpu),
-        number: (gpu) => (gpu.launch_price_usd == null ? NaN : Number(gpu.launch_price_usd)),
+        number: (gpu) => (Number(gpu.launch_price_usd) > 0 ? Number(gpu.launch_price_usd) : NaN),
         better: "lower",
         group: "value",
         note: "Cheaper"
@@ -3380,7 +3410,7 @@ function renderCompareVerdict(a, b) {
     const facts = [];
     const priceA = Number(a.launch_price_usd);
     const priceB = Number(b.launch_price_usd);
-    const hasPrices = a.launch_price_usd != null && b.launch_price_usd != null;
+    const hasPrices = priceA > 0 && priceB > 0;
 
     if (hasPrices && priceA !== priceB) {
         const cheaper = priceA < priceB ? nameA : nameB;
@@ -3641,6 +3671,8 @@ function parseCompareNumber(value) {
 
 
 function formatCompareNumber(value) {
+
+    if (value === null || value === undefined || value === "") return "--";
 
     const number =
         Number(value);
@@ -3912,6 +3944,14 @@ function renderAnalyticsStats(gpus) {
     );
 }
 
+// An empty canvas reads as broken; say there's no data in the chart's box.
+function showChartEmpty(canvas, isEmpty, text = "No data to chart yet.") {
+    const box = canvas?.parentElement;
+    if (!box) return;
+    box.classList.toggle("is-chart-empty", isEmpty);
+    box.setAttribute("data-empty-text", text);
+}
+
 function renderAnalyticsTrend(gpus) {
 
     const canvas =
@@ -3924,6 +3964,8 @@ function renderAnalyticsTrend(gpus) {
     ) {
         return;
     }
+
+    showChartEmpty(canvas, !gpus.length);
 
 
     const metricKey =
@@ -4128,6 +4170,8 @@ function renderAnalyticsBrands(gpus) {
         return;
     }
 
+    showChartEmpty(canvas, !gpus.length);
+
 
     const counts = {};
 
@@ -4152,7 +4196,9 @@ function renderAnalyticsBrands(gpus) {
     const brands = Object.keys(counts);
     if (brandNote) {
         brandNote.textContent = brands.length === 1
-            ? `All ${gpus.length} GPUs in the catalog are ${brands[0]}.`
+            ? (gpus.length === 1
+                ? `The only GPU in the catalog is ${brands[0]}.`
+                : `All ${gpus.length} GPUs in the catalog are ${brands[0]}.`)
             : "GPUs in the catalog.";
     }
 
@@ -4231,6 +4277,8 @@ function renderAnalyticsPriceScatter(gpus) {
     ) {
         return;
     }
+
+    showChartEmpty(canvas, !gpus.length);
 
 
     const brands = [
@@ -4520,6 +4568,14 @@ function renderAnalyticsRanking(gpus) {
 
     container.innerHTML =
         "";
+
+    if (!ranked.length) {
+        const empty = document.createElement("p");
+        empty.className = "analytics-list-empty";
+        empty.textContent = "No GPUs have this spec yet.";
+        container.append(empty);
+        return;
+    }
 
 
     ranked.forEach(
@@ -5008,6 +5064,9 @@ function renderRankingPodium(
     metric
 ) {
 
+    const podium = document.querySelector(".ranking-podium");
+    if (podium) podium.style.display = gpus.length ? "" : "none";
+
     renderPodiumGPU(
         $("rankingFirst"),
         gpus[0],
@@ -5044,14 +5103,11 @@ function renderPodiumGPU(
     }
 
 
+    // fewer than 3 GPUs: leave the place out instead of "No GPU available."
+    container.style.display = gpu ? "" : "none";
+
     if (!gpu) {
-
-        container.innerHTML = `
-            <div class="ranking-empty">
-                No GPU available.
-            </div>
-        `;
-
+        container.innerHTML = "";
         return;
     }
 
@@ -5099,14 +5155,7 @@ function renderPodiumGPU(
         </h3>
 
 
-        <p class="podium-series">
-
-            ${escapeHTML(
-                gpu.series ||
-                "--"
-            )}
-
-        </p>
+        ${gpu.series ? `<p class="podium-series">${escapeHTML(gpu.series)}</p>` : ""}
 
 
         <span class="podium-value-label">
@@ -5128,6 +5177,11 @@ function renderPodiumGPU(
 
         </strong>
     `;
+}
+
+function rankingIsFiltered() {
+    return ($("rankingBrand")?.value || "ALL") !== "ALL" ||
+        Boolean($("rankingSearch")?.value.trim());
 }
 
 function renderRankingTable(
@@ -5157,7 +5211,9 @@ function renderRankingTable(
                     colspan="7"
                     class="ranking-empty"
                 >
-                    No GPUs matched your filters.
+                    ${rankingIsFiltered()
+                        ? "No GPUs match this brand or filter."
+                        : "The catalog has no GPUs yet."}
                 </td>
 
             </tr>
@@ -5613,14 +5669,7 @@ function renderGpuDetailsPage(gpu) {
                 </h1>
 
 
-                <p class="gpu-page-series">
-
-                    ${escapeHTML(
-                        gpu.series ||
-                        "--"
-                    )}
-
-                </p>
+                ${gpu.series ? `<p class="gpu-page-series">${escapeHTML(gpu.series)}</p>` : ""}
 
 
                 <p class="gpu-page-description">
@@ -5834,6 +5883,8 @@ function createGpuPageSpec(
 function formatGpuPageNumber(
     value
 ) {
+
+    if (value === null || value === undefined || value === "") return "--";
 
     const numeric =
         Number(value);

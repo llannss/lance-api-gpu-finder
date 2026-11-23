@@ -219,7 +219,7 @@ button { cursor: pointer; }
 
 /* ---------- table ---------- */
 
-.admin-table-wrap { overflow-x: auto; }
+.admin-table-wrap { position: relative; overflow-x: auto; }
 
 .admin-table { width: 100%; border-collapse: collapse; }
 
@@ -413,9 +413,19 @@ button { cursor: pointer; }
 .admin-action.is-picture { background: var(--nx-tint); color: var(--ink-soft, var(--nx-ink-soft)); }
 
 .admin-table td.admin-changes {
+    min-width: 260px;
     max-width: 420px;
     color: var(--muted);
     font-size: 13px;
     line-height: 1.5;
     white-space: pre-line;
+}
+
+/* long change lists: three lines, full text on hover */
+.admin-changes-text {
+    display: -webkit-box;
+    overflow: hidden;
+    white-space: pre-line;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
 }

@@ -5554,3 +5554,92 @@ html.auth-checking .app {
         transition: none;
     }
 }
+
+/* ---------- missing GPU pictures (error listener in script.js) ---------- */
+
+.has-missing-image {
+    background-color: var(--nx-sunken);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23a3a3b8' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3.5' y='5' width='17' height='14' rx='2'/%3E%3Ccircle cx='9' cy='10' r='1.6'/%3E%3Cpath d='m20.5 16-4.5-4.5L7 19'/%3E%3C/svg%3E");
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: min(40px, 40%);
+}
+
+.has-missing-image .gpu-image-placeholder {
+    display: none;
+}
+
+/* ---------- empty charts and lists (showChartEmpty in script.js) ---------- */
+
+.is-chart-empty {
+    position: relative;
+}
+
+.is-chart-empty canvas {
+    visibility: hidden;
+}
+
+.is-chart-empty::after {
+    content: attr(data-empty-text);
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    color: var(--nx-muted);
+    font-size: 14px;
+}
+
+.analytics-list-empty {
+    padding: 24px 0;
+    color: var(--nx-muted);
+    font-size: 14px;
+    text-align: center;
+}
+
+/* ---------- Browse: Show more ---------- */
+
+.browse-more {
+    grid-column: 1 / -1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 0 16px;
+}
+
+.browse-more-button {
+    height: 40px;
+    padding: 0 20px;
+    border: 1px solid var(--nx-line-strong);
+    border-radius: 10px;
+    background: var(--nx-surface);
+    color: var(--nx-ink);
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: border-color 160ms ease, transform 160ms var(--ease-out);
+}
+
+.browse-more-button:hover {
+    border-color: var(--nx-accent-line);
+}
+
+.browse-more-button:active {
+    transform: scale(0.97);
+}
+
+.browse-more span {
+    color: var(--nx-muted);
+    font-size: 13px;
+    font-variant-numeric: tabular-nums;
+}
+
+/* GPU detail: bigger icon, and above the admin "Upload picture" button */
+.gpu-page-image.has-missing-image {
+    background-size: 56px;
+}
+
+/* no picture: the admin controls sit at the bottom, clear of the icon */
+.gpu-page-image.has-missing-image:has(.gpu-image-admin) {
+    justify-content: flex-end;
+}

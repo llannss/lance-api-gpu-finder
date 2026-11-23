@@ -79,7 +79,7 @@ const FIELDS = [
     { name: "recommended_psu", label: "Recommended PSU", unit: UNIT.watts, step: "1", min: "1", placeholder: "650" },
     { name: "process_node_nm", label: "Process node", type: "number", suffix: "nm", step: "1", min: "1", placeholder: "4" },
     { name: "pcie_interface", label: "PCIe interface", type: "select", options: ["PCIe 5.0 x16", "PCIe 5.0 x8", "PCIe 4.0 x16", "PCIe 4.0 x8", "PCIe 3.0 x16", "PCIe 3.0 x4", "PCIe 2.0 x16", "PCIe 2.0 x8"] },
-    { name: "launch_price_usd", label: "Launch price", type: "number", prefix: "$", step: "any", min: "0", optional: true, hint: "Leave empty if unknown" },
+    { name: "launch_price_usd", label: "Launch price", type: "number", prefix: "$", step: "any", min: "1", optional: true, hint: "Leave empty if unknown" },
     { name: "release_date", label: "Release date", type: "date" },
     { name: "description", label: "Description", type: "textarea", wide: true },
 ];
@@ -248,6 +248,8 @@ function renderRows() {
     }
 }
 
+const NO_PICTURE_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="5" width="17" height="14" rx="2"/><circle cx="9" cy="10" r="1.6"/><path d="m20.5 16-4.5-4.5L7 19"/></svg><span class="visually-hidden">No picture</span>';
+
 function thumbnail(gpu) {
     const frame = document.createElement("div");
     frame.className = "admin-thumb";
@@ -257,11 +259,17 @@ function thumbnail(gpu) {
         img.src = gpu.image_url;
         img.alt = "";
         img.loading = "lazy";
+        // a picture URL whose file is gone shows the same icon as "no picture"
+        img.addEventListener("error", () => {
+            frame.classList.add("is-empty");
+            frame.title = "Picture file missing";
+            frame.innerHTML = NO_PICTURE_ICON;
+        }, { once: true });
         frame.append(img);
     } else {
         frame.classList.add("is-empty");
         frame.title = "No picture yet";
-        frame.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="5" width="17" height="14" rx="2"/><circle cx="9" cy="10" r="1.6"/><path d="m20.5 16-4.5-4.5L7 19"/></svg><span class="visually-hidden">No picture</span>';
+        frame.innerHTML = NO_PICTURE_ICON;
     }
     return frame;
 }
@@ -302,9 +310,16 @@ const ACTIVITY_PAGE = 25;
 let activityOffset = 0;
 
 function formatWhen(iso) {
+    if (!iso) return "—";   // new Date(null) is 1 Jan 1970
     const date = new Date(iso);
     if (Number.isNaN(date.getTime())) return iso || "";
     return date.toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" });
+}
+
+// "gpu.bulk_import" -> "Bulk import" for actions this page has no label for
+function actionWords(action) {
+    const words = String(action || "").split(".").pop().replace(/[_-]+/g, " ").trim();
+    return words ? words[0].toUpperCase() + words.slice(1) : "Changed";
 }
 
 function summarizeChanges(changes) {
@@ -351,9 +366,9 @@ async function loadActivity(reset = true) {
     for (const entry of entries) {
         const row = body.insertRow();
         row.insertCell().textContent = formatWhen(entry.created_at);
-        row.insertCell().textContent = entry.admin_email;
+        row.insertCell().textContent = entry.admin_email || "—";
 
-        const [label, style] = ACTION_LABELS[entry.action] || [entry.action, ""];
+        const [label, style] = ACTION_LABELS[entry.action] || [actionWords(entry.action), ""];
         const pill = document.createElement("span");
         pill.className = `admin-action ${style}`;
         pill.textContent = label;
@@ -365,11 +380,18 @@ async function loadActivity(reset = true) {
 
         const changes = row.insertCell();
         changes.className = "admin-changes";
-        changes.textContent = summarizeChanges(entry.changes) || "—";
+        const summary = summarizeChanges(entry.changes) || "—";
+        const clamp = document.createElement("div");
+        clamp.className = "admin-changes-text";
+        clamp.textContent = summary;
+        if (summary.split("\n").length > 3) clamp.title = summary;
+        changes.append(clamp);
     }
 
     activityOffset += entries.length;
-    $("activityTotal").textContent = data.total ? `${data.total} change${data.total === 1 ? "" : "s"}` : "";
+    $("activityTotal").textContent = data.total
+        ? `${Number(data.total).toLocaleString()} change${data.total === 1 ? "" : "s"}`
+        : "";
     $("activityMore").hidden = activityOffset >= (data.total || 0);
 }
 
