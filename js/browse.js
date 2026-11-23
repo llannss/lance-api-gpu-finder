@@ -342,6 +342,7 @@ function openDetailsSidebar(gpu) {
     recordRecentView(gpu.id);
 
     browseLayout.classList.add("details-open");
+    fitDetailsSidebar();
     detailsEmpty.hidden = true;
     detailsContent.hidden = false;
 
@@ -410,6 +411,30 @@ function openDetailsSidebar(gpu) {
     paintFavoriteButton(heart, getFavoriteIds().has(String(gpu.id)));
     heart.addEventListener("click", () => toggleFavorite(heart, gpu.id));
 }
+
+// The panel sticks 12px from the top, but until the page has scrolled that
+// far it starts lower down, and a full-screen-tall panel would run off the
+// bottom. Size it to the space actually left below its top edge.
+let fitDetailsQueued = false;
+
+function fitDetailsSidebar() {
+    const sidebar = document.getElementById("detailsSidebar");
+    if (!sidebar || !browseLayout?.classList.contains("details-open")) return;
+    const top = Math.max(12, sidebar.getBoundingClientRect().top);
+    sidebar.style.setProperty("--details-top", `${Math.round(top)}px`);
+}
+
+function queueFitDetailsSidebar() {
+    if (fitDetailsQueued) return;
+    fitDetailsQueued = true;
+    requestAnimationFrame(() => {
+        fitDetailsQueued = false;
+        fitDetailsSidebar();
+    });
+}
+
+window.addEventListener("scroll", queueFitDetailsSidebar, { passive: true });
+window.addEventListener("resize", queueFitDetailsSidebar);
 
 function closeDetailsSidebar() {
     selectedGPU = null;

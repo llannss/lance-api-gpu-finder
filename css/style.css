@@ -1528,9 +1528,11 @@ body.modal-open {
     align-self: start;
 
     width: 100%;
-    height: calc(100vh - 24px);
+    /* --details-top is where the panel starts on screen (js/browse.js
+       fitDetailsSidebar), so it ends 12px above the bottom edge */
+    height: calc(100dvh - var(--details-top, 12px) - 12px);
     min-width: 0;
-    min-height: 0;
+    min-height: 320px;
 }
 
 .browse-layout.details-open .details-sidebar {
