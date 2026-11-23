@@ -3,15 +3,53 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sign in - GPU Nexus</title>
+    <title>Sign in – GPU Nexus</title>
+    <meta name="theme-color" content="#f7f7fc">
+    <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+    <link rel="preload" href="assets/fonts/archivo-latin.woff2" as="font" type="font/woff2" crossorigin>
     <link rel="stylesheet" href="css/nexus-auth.css">
 </head>
 <body class="nx-page" data-page="signin">
-    <div class="nx-backdrop" aria-hidden="true"></div>
-    <svg class="nx-wave" viewBox="0 0 800 160" preserveAspectRatio="none" aria-hidden="true">
-        <path d="M0 70C160 20 330 10 520 60C640 92 720 120 800 160H0Z" fill="#c4b5fd" fill-opacity="0.45"/>
-        <path d="M0 110C180 60 360 70 540 110C650 134 730 150 800 160H0Z" fill="#8b5cf6" fill-opacity="0.35"/>
-    </svg>
+    <div class="nx-backdrop" aria-hidden="true">
+        <svg class="nx-gpu-art" viewBox="0 0 600 300" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <defs>
+                <path id="nxBlade" d="M0 -20C22 -38 44 -52 64 -46"/>
+            </defs>
+            <rect x="20" y="40" width="20" height="220" rx="3"/>
+            <rect x="25" y="70" width="10" height="34" rx="2"/>
+            <rect x="25" y="116" width="10" height="34" rx="2"/>
+            <rect x="25" y="162" width="10" height="24" rx="2"/>
+            <rect x="40" y="52" width="520" height="190" rx="18"/>
+            <path d="M300 70v154"/>
+            <rect x="490" y="30" width="40" height="22" rx="3"/>
+            <path d="M150 242v22h270v-22"/>
+            <path d="M162 264v-12M174 264v-12M186 264v-12M198 264v-12M210 264v-12M222 264v-12M234 264v-12M246 264v-12M258 264v-12M270 264v-12M282 264v-12M294 264v-12M306 264v-12M318 264v-12M330 264v-12M342 264v-12M354 264v-12M366 264v-12M378 264v-12M390 264v-12M402 264v-12M414 264v-12"/>
+            <g transform="translate(190 147)">
+                <circle r="78"/>
+                <circle r="20"/>
+                <use href="#nxBlade" transform="rotate(0)"/>
+                <use href="#nxBlade" transform="rotate(45)"/>
+                <use href="#nxBlade" transform="rotate(90)"/>
+                <use href="#nxBlade" transform="rotate(135)"/>
+                <use href="#nxBlade" transform="rotate(180)"/>
+                <use href="#nxBlade" transform="rotate(225)"/>
+                <use href="#nxBlade" transform="rotate(270)"/>
+                <use href="#nxBlade" transform="rotate(315)"/>
+            </g>
+            <g transform="translate(410 147)">
+                <circle r="78"/>
+                <circle r="20"/>
+                <use href="#nxBlade" transform="rotate(0)"/>
+                <use href="#nxBlade" transform="rotate(45)"/>
+                <use href="#nxBlade" transform="rotate(90)"/>
+                <use href="#nxBlade" transform="rotate(135)"/>
+                <use href="#nxBlade" transform="rotate(180)"/>
+                <use href="#nxBlade" transform="rotate(225)"/>
+                <use href="#nxBlade" transform="rotate(270)"/>
+                <use href="#nxBlade" transform="rotate(315)"/>
+            </g>
+        </svg>
+    </div>
 
     <header class="nx-header">
         <a class="nx-brand" href="index.html" aria-label="GPU Nexus home">
@@ -27,59 +65,19 @@
 
         <nav class="nx-nav" aria-label="Products">
             <a href="index.html">Finder</a>
-            <span class="nx-nav-item">Guesser</span>
+            <!-- the game's own deploy for now; switch to /arena/ once the Hub rewrite exists -->
+            <a href="https://lance-api-gpu-guessr.vercel.app">Guesser</a>
             <span class="nx-nav-item">Marketplace</span>
         </nav>
     </header>
 
     <main class="nx-layout">
         <section class="nx-hero" aria-labelledby="heroTitle">
-            <p class="nx-eyebrow">The ultimate GPU hub</p>
-            <h2 class="nx-title" id="heroTitle">Find, Play, and Trade <span>GPUs</span></h2>
-            <p class="nx-lead">Compare GPU specs, test your knowledge, and buy or sell GPUs, all in one place.</p>
+            <p class="nx-title" id="heroTitle">Find, compare, and guess <span>GPUs</span></p>
+            <p class="nx-lead">Put specs side by side, rank the cards that matter to you, and test what you know in the GPU Guesser.</p>
         </section>
 
-        <ul class="nx-features" aria-label="What's inside">
-            <li class="nx-feature">
-                <svg class="nx-feature-icon is-blue" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                    <circle cx="10.5" cy="10.5" r="6.5" stroke="currentColor" stroke-width="2"/>
-                    <path d="M20 20l-4.8-4.8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                </svg>
-                <h3>GPU Finder</h3>
-                <p>Search, compare, and rank GPUs.</p>
-            </li>
-            <li class="nx-feature">
-                <svg class="nx-feature-icon is-purple" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                    <path d="M6.5 8h11a4 4 0 0 1 3.9 4.9l-.9 3.8a2.4 2.4 0 0 1-4.1 1.1L14.6 16H9.4l-1.8 1.8a2.4 2.4 0 0 1-4.1-1.1l-.9-3.8A4 4 0 0 1 6.5 8z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
-                    <path d="M8 10.5v3M6.5 12h3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                    <circle cx="15.5" cy="11.2" r="1" fill="currentColor"/>
-                    <circle cx="17.5" cy="13.2" r="1" fill="currentColor"/>
-                </svg>
-                <h3>GPU Guesser</h3>
-                <p>A fun game to test your GPU knowledge.</p>
-            </li>
-            <li class="nx-feature">
-                <svg class="nx-feature-icon is-blue" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                    <path d="M2.5 3.5h2.2l2.5 10.7a1.6 1.6 0 0 0 1.6 1.3h8.5a1.6 1.6 0 0 0 1.5-1.2l1.7-6.8H5.6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                    <circle cx="9.5" cy="19.5" r="1.5" fill="currentColor"/>
-                    <circle cx="17" cy="19.5" r="1.5" fill="currentColor"/>
-                </svg>
-                <h3>GPU Marketplace</h3>
-                <p>Buy, sell, and trade GPUs safely.</p>
-            </li>
-        </ul>
-
         <div class="nx-card">
-            <div class="nx-card-brand" aria-hidden="true">
-                <svg class="nx-chip" viewBox="0 0 32 32" fill="none">
-                    <path d="M11 2.5v4M16 2.5v4M21 2.5v4M11 25.5v4M16 25.5v4M21 25.5v4M2.5 11h4M2.5 16h4M2.5 21h4M25.5 11h4M25.5 16h4M25.5 21h4" stroke="#1e1b4b" stroke-width="2" stroke-linecap="round"/>
-                    <rect x="6.5" y="6.5" width="19" height="19" rx="4.5" fill="#f5f3ff" stroke="#1e1b4b" stroke-width="2"/>
-                    <circle cx="16" cy="16" r="6" fill="#8b5cf6"/>
-                    <path d="M16 16c0-2.4 1.1-3.9 3-4.3M16 16c2.1 1.2 2.8 3 2.1 4.8M16 16c-2.1 1.2-4 1.2-5.2-.3" stroke="#fff" stroke-width="1.5" stroke-linecap="round"/>
-                    <circle cx="16" cy="16" r="1.3" fill="#fff"/>
-                </svg>
-                <span class="nx-wordmark">GPU <span>Nexus</span></span>
-            </div>
 
             <h1>Welcome back</h1>
             <p class="nx-card-lead">Sign in to your GPU Nexus account.</p>
@@ -98,11 +96,8 @@
                     </div>
                 </div>
 
-                <div class="nx-field">
-                    <div class="nx-label-row">
-                        <label for="password">Password</label>
-                        <a href="reset.html">Forgot password?</a>
-                    </div>
+                <div class="nx-field has-aside">
+                    <label for="password">Password</label>
                     <div class="nx-input">
                         <svg class="nx-input-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
                             <rect x="4.5" y="10.5" width="15" height="10" rx="2.5" stroke="currentColor" stroke-width="1.8"/>
@@ -119,6 +114,8 @@
                             </svg>
                         </button>
                     </div>
+                    <!-- after the input in the HTML so Tab goes Email → Password; CSS shows it top-right -->
+                    <a class="nx-field-aside" href="reset.html">Forgot password?</a>
                     <p class="nx-caps" id="capsHint" hidden>Caps Lock is on.</p>
                 </div>
 
@@ -127,6 +124,37 @@
 
             <p class="nx-switch">New to GPU Nexus? <a href="signup.html">Create an account</a></p>
         </div>
+
+        <ul class="nx-features" aria-label="What's inside">
+            <li class="nx-feature">
+                <svg class="nx-feature-icon is-blue" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                    <circle cx="10.5" cy="10.5" r="6.5" stroke="currentColor" stroke-width="2"/>
+                    <path d="M20 20l-4.8-4.8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+                <h2>GPU Finder</h2>
+                <p>Search, compare, and rank GPUs.</p>
+            </li>
+            <li class="nx-feature">
+                <svg class="nx-feature-icon is-purple" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                    <path d="M6.5 8h11a4 4 0 0 1 3.9 4.9l-.9 3.8a2.4 2.4 0 0 1-4.1 1.1L14.6 16H9.4l-1.8 1.8a2.4 2.4 0 0 1-4.1-1.1l-.9-3.8A4 4 0 0 1 6.5 8z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+                    <path d="M8 10.5v3M6.5 12h3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                    <circle cx="15.5" cy="11.2" r="1" fill="currentColor"/>
+                    <circle cx="17.5" cy="13.2" r="1" fill="currentColor"/>
+                </svg>
+                <h2>GPU Guesser</h2>
+                <p>Name the GPU from its spec sheet.</p>
+            </li>
+            <li class="nx-feature">
+                <svg class="nx-feature-icon is-blue" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                    <path d="M2.5 3.5h2.2l2.5 10.7a1.6 1.6 0 0 0 1.6 1.3h8.5a1.6 1.6 0 0 0 1.5-1.2l1.7-6.8H5.6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <circle cx="9.5" cy="19.5" r="1.5" fill="currentColor"/>
+                    <circle cx="17" cy="19.5" r="1.5" fill="currentColor"/>
+                </svg>
+                <h2>GPU Marketplace</h2>
+                <p>Buy and sell used GPUs.</p>
+            </li>
+        </ul>
+
     </main>
 <script src="js/auth.js"></script>
 <script src="js/nexus-auth-ui.js"></script>

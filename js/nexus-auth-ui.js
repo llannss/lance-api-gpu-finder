@@ -58,10 +58,29 @@ document.addEventListener("DOMContentLoaded", () => {
         if (!rule) return;
 
         const min = Number(input.getAttribute("minlength")) || 8;
-        const update = () => { rule.dataset.met = String(input.value.length >= min); };
+        const status = rule.querySelector("[data-rule-status]");
+
+        // The tick is visual; screen readers hear one line when the rule flips
+        // to met, and nothing on every other keystroke.
+        const update = () => {
+            const met = input.value.length >= min;
+            if (rule.dataset.met === String(met)) return;
+
+            rule.dataset.met = String(met);
+            if (status) status.textContent = met ? `Requirement met: at least ${min} characters.` : "";
+        };
 
         input.addEventListener("input", update);
         update();
+    });
+
+    // ---------- clear an error mark as soon as the field is edited ----------
+    // auth.js sets aria-invalid on the field an error is about.
+
+    document.addEventListener("input", (event) => {
+        if (event.target.matches?.("[aria-invalid='true']")) {
+            event.target.removeAttribute("aria-invalid");
+        }
     });
 
     document.querySelectorAll("input[data-match]").forEach((confirm) => {
