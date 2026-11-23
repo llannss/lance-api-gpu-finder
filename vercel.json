@@ -10,6 +10,10 @@
       "destination": "https://lance-api-murex.vercel.app/:path*"
     },
     {
+      "source": "/arena/",
+      "destination": "https://lance-api-gpu-guessr.vercel.app/index.html"
+    },
+    {
       "source": "/arena/:path*",
       "destination": "https://lance-api-gpu-guessr.vercel.app/:path*"
     },
