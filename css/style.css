@@ -3278,6 +3278,12 @@ body.modal-open {
         padding: 12px;
     }
 
+    /* in a column, flex-start would size the text to its one-line width, so a
+       long GPU name pushed the page sideways; stretch keeps it to the card */
+    .analytics-stat-card > div:last-child {
+        align-self: stretch;
+    }
+
     .analytics-stat-icon {
         width: 32px;
         height: 32px;
