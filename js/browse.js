@@ -143,12 +143,8 @@ async function loadBrowseGPUs() {
 
 
         if (browseGpuGrid) {
-
-            browseGpuGrid.innerHTML = `
-                <div class="empty-state">
-                    Unable to load GPUs.
-                </div>
-            `;
+            // showLoadError lives in script.js, which loads after this file
+            showLoadError(browseGpuGrid, { replace: true });
         }
     }
 }
@@ -280,7 +276,7 @@ function renderBrowseGrid(gpus) {
                     type="button"
                     data-gpu-id="${escapeHTML(String(gpu.id ?? ""))}"
                     aria-pressed="false"
-                >♡</button>
+                >${iconSVG("heart")}</button>
                 <img
                     src="${escapeHTML(imagePath)}"
                     alt="${escapeHTML(`${brand} ${model}`)}"
@@ -311,7 +307,7 @@ function renderBrowseGrid(gpus) {
                     data-gpu-id="${gpu.id}"
                 >
                     View Details
-                    <span>→</span>
+                    ${iconSVG("arrowRight")}
                 </button>
             </div>
         `;
@@ -366,7 +362,7 @@ function openDetailsSidebar(gpu) {
                     type="button"
                     data-gpu-id="${escapeHTML(String(gpu.id ?? ""))}"
                     aria-pressed="false"
-                >♡</button>
+                >${iconSVG("heart")}</button>
             </div>
 
             <p class="details-series">

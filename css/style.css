@@ -3239,8 +3239,43 @@ body.modal-open {
     }
 
 
+    /* chart title on top, its metric picker full width below */
+    .analytics-panel-header {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .analytics-panel-header select {
+        width: 100%;
+    }
+
+    /* 2x2 on phones so the first chart is close to the top */
     .analytics-stats {
-        grid-template-columns: 1fr;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 8px;
+    }
+
+    .analytics-stat-card {
+        min-height: 0;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+        padding: 12px;
+    }
+
+    .analytics-stat-icon {
+        width: 32px;
+        height: 32px;
+        flex-basis: 32px;
+        border-radius: 8px;
+    }
+
+    .analytics-stat-card strong {
+        font-size: 20px;
+    }
+
+    #analyticsLatestGpu {
+        font-size: 16px;
     }
 
 
@@ -5089,4 +5124,147 @@ html.auth-checking .app {
     margin-top: 8px;
     color: var(--nx-muted);
     font-size: 14px;
+}
+
+/* ---------- skip link: first Tab stop on every Finder page ---------- */
+
+.skip-link {
+    position: fixed;
+    top: 12px;
+    left: 12px;
+    z-index: 1000;
+    padding: 10px 16px;
+    border-radius: 8px;
+    background: var(--nx-ink);
+    color: #fff;
+    font-size: 14px;
+    font-weight: 600;
+    text-decoration: none;
+    transform: translateY(-160%);
+    transition: transform 160ms var(--ease-out);
+}
+
+.skip-link:focus-visible {
+    transform: translateY(0);
+    outline: 3px solid var(--nx-purple-bright);
+    outline-offset: 2px;
+}
+
+.main:focus {
+    outline: none;
+}
+
+/* ---------- load errors (showLoadError in script.js) ---------- */
+
+.load-error {
+    grid-column: 1 / -1;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 16px;
+    padding: 16px 20px;
+    border: 1px solid var(--nx-danger-line);
+    border-radius: 12px;
+    background: var(--nx-danger-bg);
+    color: var(--nx-ink);
+}
+
+.load-error > div {
+    flex: 1 1 220px;
+    min-width: 0;
+}
+
+.load-error strong {
+    display: block;
+    font-size: 16px;
+    font-weight: 700;
+}
+
+.load-error p {
+    margin: 2px 0 0;
+    color: var(--nx-ink-soft);
+    font-size: 14px;
+}
+
+.load-error-fan {
+    width: 40px;
+    height: 40px;
+    flex: 0 0 40px;
+    color: var(--nx-danger);
+}
+
+.load-error-retry:disabled {
+    opacity: 0.6;
+    cursor: wait;
+}
+
+/* ---------- drawn icons (iconSVG in script.js) ---------- */
+
+.icon {
+    width: 1.1em;
+    height: 1.1em;
+    flex: none;
+    vertical-align: -0.2em;
+}
+
+.text-button .icon,
+.gpu-details-button .icon {
+    transition: transform 160ms var(--ease-out);
+}
+
+.text-button:hover .icon,
+.gpu-details-button:hover .icon {
+    transform: translateX(2px);
+}
+
+/* hearts: outline until saved, then filled; 32px tap target */
+.gpu-favorite {
+    width: 32px;
+    height: 32px;
+    flex-basis: 32px;
+    border-radius: 999px;
+}
+
+.gpu-favorite .icon {
+    width: 18px;
+    height: 18px;
+    vertical-align: 0;
+}
+
+.gpu-favorite.active .icon {
+    fill: currentColor;
+}
+
+.save-comparison,
+.compare-action-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.save-comparison.is-saved .icon {
+    fill: currentColor;
+}
+
+.profile-caret .icon {
+    width: 14px;
+    height: 14px;
+    vertical-align: -2px;
+}
+
+.profile-item-icon {
+    display: inline-grid;
+    place-items: center;
+}
+
+.profile-item-icon .icon {
+    width: 18px;
+    height: 18px;
+}
+
+.gpu-page-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
 }

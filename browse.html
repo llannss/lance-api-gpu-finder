@@ -12,6 +12,7 @@
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
+<a class="skip-link" href="#browsePage">Skip to content</a>
 
 <div class="app">
 
@@ -49,7 +50,7 @@
 
 
     <!-- MAIN -->
-    <main class="main" id="browsePage">
+    <main class="main" id="browsePage" tabindex="-1">
 
         <header class="topbar">
             <form
@@ -62,8 +63,9 @@
 
     <input
         id="searchInput"
+        aria-label="Search GPUs"
         type="text"
-        placeholder='Search GPUs, e.g. "RTX 4090" or "Blackwell"'
+        placeholder="Search GPUs"
         autocomplete="off"
     >
 
@@ -88,7 +90,7 @@
             <div class="browse-controls">
                 <span id="resultsCount">0 GPUs</span>
 
-                <select id="sortSelect">
+                <select id="sortSelect" aria-label="Sort GPUs">
                     <option value="newest">Newest First</option>
                     <option value="oldest">Oldest First</option>
                     <option value="price-high">Price: High to Low</option>

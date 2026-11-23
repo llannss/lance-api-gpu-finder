@@ -21,6 +21,7 @@
 
 
 <body>
+<a class="skip-link" href="#main">Skip to content</a>
 
 <div class="app">
 
@@ -67,7 +68,7 @@
          MAIN
     ========================================== -->
 
-    <main class="main rankings-page">
+    <main class="main rankings-page" id="main" tabindex="-1">
 
 
         <!-- SEARCH -->
@@ -84,8 +85,9 @@
 
     <input
         id="searchInput"
+        aria-label="Search GPUs"
         type="text"
-        placeholder='Search GPUs, e.g. "RTX 4090" or "Blackwell"'
+        placeholder="Search GPUs"
         autocomplete="off"
     >
 
@@ -188,54 +190,6 @@
                     </select>
 
                 </div>
-
-            </div>
-
-        </section>
-
-
-
-        <!-- =========================================
-             SUMMARY
-        ========================================== -->
-
-        <section class="rankings-summary">
-
-            <div>
-
-                <span>
-                    Ranking
-                </span>
-
-                <strong id="rankingTitle">
-                    Highest VRAM
-                </strong>
-
-            </div>
-
-
-            <div>
-
-                <span>
-                    Eligible GPUs
-                </span>
-
-                <strong id="rankingCount">
-                    0
-                </strong>
-
-            </div>
-
-
-            <div>
-
-                <span>
-                    Brand Filter
-                </span>
-
-                <strong id="rankingBrandLabel">
-                    All Brands
-                </strong>
 
             </div>
 

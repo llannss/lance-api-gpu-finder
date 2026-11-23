@@ -9,6 +9,7 @@
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
+<a class="skip-link" href="#main">Skip to content</a>
 <div class="app">
     <aside class="sidebar">
         <a class="logo" href="index.html" aria-label="GPU Nexus Finder, home">
@@ -38,7 +39,7 @@
 
     </aside>
 
-    <main class="main">
+    <main class="main" id="main" tabindex="-1">
         <header class="topbar">
             <form
     class="search-wrapper"
@@ -50,8 +51,9 @@
 
     <input
         id="searchInput"
+        aria-label="Search GPUs"
         type="text"
-        placeholder='Search GPUs, e.g. "RTX 4090" or "Blackwell"'
+        placeholder="Search GPUs"
         autocomplete="off"
     >
 
@@ -87,7 +89,7 @@
                         <h2>Featured GPUs</h2>
                         <p>Picked automatically from the catalog: each badge goes to the card that earns it.</p>
                     </div>
-                    <a class="text-button" href="browse.html">View All →</a>
+                    <a class="text-button" href="browse.html">View All <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
                 </div>
                 <div class="gpu-grid" id="featuredGPUs" aria-live="polite"></div>
             </section>
@@ -174,7 +176,7 @@
                         </div>
                         <div class="chat-typing" id="chatTyping">Thinking...</div>
                         <form class="chat-form" id="chatForm">
-                            <input id="chatInput" type="text" placeholder="Ask about GPUs..." autocomplete="off" maxlength="500">
+                            <input id="chatInput" type="text" aria-label="Ask the GPU assistant" placeholder="Ask about GPUs..." autocomplete="off" maxlength="500">
                             <button class="chat-send" id="chatSend" type="submit">Send</button>
                         </form>
                     </div>

@@ -8,6 +8,24 @@
 // cookie the API sets; page scripts never see the token.
 const API_URL = "/api";
 
+// One drawn icon set (24px grid, 1.8 stroke, currentColor), matching the
+// sidebar icons. Text symbols render differently on every system.
+const ICON_PATHS = {
+    heart: '<path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/>',
+    arrowRight: '<path d="M5 12h14M13 6l6 6-6 6"/>',
+    arrowLeft: '<path d="M19 12H5M11 6l-6 6 6 6"/>',
+    chevronDown: '<path d="m6 9 6 6 6-6"/>',
+    clock: '<circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/>',
+    star: '<path d="m12 3.8 2.5 5.1 5.6.8-4 3.9.9 5.6-5-2.6-5 2.6.9-5.6-4-3.9 5.6-.8z"/>',
+    swap: '<path d="M7 4v16M4 7l3-3 3 3M17 20V4M14 17l3 3 3-3"/>',
+    logout: '<path d="M14 4h4a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-4M10 16l-4-4 4-4M6 12h10"/>',
+    devices: '<rect x="3" y="5" width="13" height="10" rx="1.5"/><path d="M7 19h5M9.5 15v4"/><rect x="17.5" y="9" width="4" height="10" rx="1"/>'
+};
+
+function iconSVG(name, className = "icon") {
+    return `<svg class="${className}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICON_PATHS[name] || ""}</svg>`;
+}
+
 const DASHBOARD_REFRESH_MS = 60_000;
 const FAVORITES_KEY = "gpuFinderFavorites";
 
@@ -130,7 +148,7 @@ function renderAccountBox(account) {
     const caret = document.createElement("span");
     caret.className = "profile-caret";
     caret.setAttribute("aria-hidden", "true");
-    caret.textContent = "▾";
+    caret.innerHTML = iconSVG("chevronDown");
 
     trigger.append(avatar, name, caret);
 
@@ -170,7 +188,7 @@ function renderAccountBox(account) {
         const i = document.createElement("span");
         i.className = "profile-item-icon";
         i.setAttribute("aria-hidden", "true");
-        i.textContent = icon;
+        i.innerHTML = iconSVG(icon);
         const t = document.createElement("span");
         t.textContent = label;
         el.append(i, t);
@@ -192,12 +210,12 @@ function renderAccountBox(account) {
     panel.append(
         head,
         divider(),
-        item("My favorites", "♥", { href: "favorites.html" }, { badgeId: "favoriteCount" }),
-        item("Recently viewed", "🕘", { href: "index.html#recentPanel" }),
-        item("Saved comparisons", "★", { href: "compare.html#savedComparisons" }),
+        item("My favorites", "heart", { href: "favorites.html" }, { badgeId: "favoriteCount" }),
+        item("Recently viewed", "clock", { href: "index.html#recentPanel" }),
+        item("Saved comparisons", "star", { href: "compare.html#savedComparisons" }),
         divider(),
-        item("Sign out", "⎋", signOutHere),
-        item("Sign out on all devices", "⊘", signOutEverywhere, { danger: true })
+        item("Sign out", "logout", signOutHere),
+        item("Sign out on all devices", "devices", signOutEverywhere, { danger: true })
     );
 
     wrap.append(trigger, panel);
@@ -380,6 +398,66 @@ function renderDashboardError() {
 
 
 // ============================================
+// LOAD ERRORS: one failure state for every Finder page
+// ============================================
+
+// Says what failed and gives a Retry that checks the server first, so a
+// second failure updates the message instead of reloading into the same error.
+function showLoadError(target, {
+    title = "Couldn't load the GPU catalog.",
+    detail = "The server didn't answer. Check your connection, then try again.",
+    probe = () => fetchGPUs({ force: true }),
+    onRecover = () => window.location.reload(),
+    replace = false
+} = {}) {
+    if (!target) return;
+
+    target.querySelector(":scope > .load-error")?.remove();
+
+    const box = document.createElement("div");
+    box.className = "load-error";
+    box.setAttribute("role", "alert");
+    box.innerHTML = `
+        <svg class="load-error-fan" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <circle cx="24" cy="24" r="19"/>
+            <circle cx="24" cy="24" r="3.5"/>
+            <path d="M24 20.5c-1-5 1-9.5 6-11M27.4 25c4.8 1.8 7.6 5.7 7 11M20.6 25.6c-3.8 3.3-8.6 3.9-13 1"/>
+        </svg>
+        <div>
+            <strong></strong>
+            <p></p>
+        </div>
+        <button type="button" class="primary-btn load-error-retry">Retry</button>
+    `;
+    box.querySelector("strong").textContent = title;
+    box.querySelector("p").textContent = detail;
+
+    const retry = box.querySelector("button");
+    retry.addEventListener("click", async () => {
+        retry.disabled = true;
+        retry.textContent = "Retrying…";
+        try {
+            await probe();
+            onRecover();
+        } catch {
+            retry.disabled = false;
+            retry.textContent = "Retry";
+            box.querySelector("p").textContent =
+                "Still no answer from the server. Wait a few seconds and try again.";
+        }
+    });
+
+    if (replace) {
+        target.replaceChildren(box);
+    } else {
+        // page-level: just under the search bar
+        const topbar = target.querySelector(":scope > .topbar");
+        topbar ? topbar.after(box) : target.prepend(box);
+    }
+}
+
+
+// ============================================
 // FEATURED GPUs
 // ============================================
 
@@ -550,7 +628,7 @@ function createFeaturedGpuCard(gpu, badge) {
                 )}"
                 aria-pressed="${isFavorite}"
             >
-                ${isFavorite ? "♥" : "♡"}
+                ${iconSVG("heart")}
             </button>
 
         </div>
@@ -598,7 +676,7 @@ function createFeaturedGpuCard(gpu, badge) {
                 )}"
             >
                 View Details
-                <span>→</span>
+                ${iconSVG("arrowRight")}
             </button>
 
         </div>
@@ -787,7 +865,14 @@ async function setupFavoritesPage() {
         if (!response.ok) throw new Error(String(response.status));
         gpus = (await response.json()).gpus || [];
     } catch {
-        grid.innerHTML = `<div class="empty-state">Couldn't load your favorites. Try again in a moment.</div>`;
+        showLoadError(grid, {
+            title: "Couldn't load your favorites.",
+            probe: async () => {
+                const r = await apiFetch("/me/favorites", { cache: "no-store" });
+                if (!r.ok) throw new Error(String(r.status));
+            },
+            replace: true
+        });
         return;
     }
 
@@ -807,11 +892,11 @@ async function setupFavoritesPage() {
             const title = document.createElement("strong");
             title.textContent = "No favorites yet";
             const text = document.createElement("p");
-            text.textContent = "Tap the ♡ on any GPU to save it here.";
+            text.textContent = "Tap the heart on any GPU to save it here.";
             const link = document.createElement("a");
             link.className = "primary-btn";
             link.href = "browse.html";
-            link.textContent = "Browse GPUs →";
+            link.innerHTML = `Browse GPUs ${iconSVG("arrowRight")}`;
             empty.append(title, text, link);
             grid.append(empty);
             return;
@@ -836,7 +921,7 @@ function syncFavoriteButtons() {
 
 function paintFavoriteButton(button, active) {
     button.classList.toggle("active", active);
-    button.textContent = active ? "♥" : "♡";
+    if (!button.querySelector("svg")) button.innerHTML = iconSVG("heart");
     button.setAttribute("aria-pressed", String(active));
     button.setAttribute("aria-label", active ? "Remove from favorites" : "Save to favorites");
     button.title = active ? "Saved to your favorites" : "Save to favorites";
@@ -966,7 +1051,7 @@ function updateSaveComparisonButton() {
     const button = $("saveComparison");
     if (!button) return;
     const saved = currentSavedComparison();
-    button.textContent = saved ? "★ Saved" : "☆ Save comparison";
+    button.innerHTML = `${iconSVG("star")}<span>${saved ? "Saved" : "Save comparison"}</span>`;
     button.classList.toggle("is-saved", Boolean(saved));
     button.setAttribute("aria-pressed", String(Boolean(saved)));
     button.title = saved ? "Remove from your saved comparisons" : "Save this pair to your account";
@@ -2552,6 +2637,7 @@ async function setupComparePage() {
             "Compare page error:",
             error
         );
+        showLoadError(document.querySelector(".main"));
     }
 }
 
@@ -3669,6 +3755,7 @@ async function setupAnalyticsPage() {
             "Analytics page error:",
             error
         );
+        showLoadError(document.querySelector(".main"));
     }
 }
 
@@ -4734,6 +4821,7 @@ async function setupRankingsPage() {
             "Rankings page error:",
             error
         );
+        showLoadError(document.querySelector(".main"));
     }
 }
 
@@ -4871,9 +4959,13 @@ function renderRankingsPage() {
     );
 
 
+    // the count used to sit in a summary box that repeated the dropdowns
     setText(
         "rankingDescription",
-        metric.description
+        metric.description.replace(
+            /^GPUs/,
+            `${gpus.length.toLocaleString()} ${gpus.length === 1 ? "GPU" : "GPUs"}`
+        )
     );
 
 
@@ -5305,9 +5397,10 @@ async function setupGpuDetailsPage() {
         );
 
 
-        renderGpuPageError(
-            "Unable to load this GPU."
-        );
+        showLoadError($("gpuPageContent"), {
+            title: "Couldn't load this GPU.",
+            replace: true
+        });
     }
 }
 
@@ -5468,7 +5561,8 @@ function renderGpuDetailsPage(gpu) {
                 href="browse.html"
                 class="gpu-page-back"
             >
-                ← Back to Browse
+                ${iconSVG("arrowLeft")}
+                Back to Browse
             </a>
 
         </div>
@@ -5581,7 +5675,7 @@ function renderGpuDetailsPage(gpu) {
                         class="gpu-favorite gpu-page-favorite"
                         data-gpu-id="${escapeHTML(String(gpu.id ?? ""))}"
                         aria-pressed="false"
-                    >♡</button>
+                    >${iconSVG("heart")}</button>
 
                 </div>
 

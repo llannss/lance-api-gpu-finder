@@ -21,6 +21,7 @@
 
 
 <body>
+<a class="skip-link" href="#main">Skip to content</a>
 
 <div class="app">
 
@@ -67,7 +68,7 @@
          MAIN
     ========================================== -->
 
-    <main class="main analytics-page">
+    <main class="main analytics-page" id="main" tabindex="-1">
 
 
         <!-- SEARCH -->
@@ -84,8 +85,9 @@
 
     <input
         id="searchInput"
+        aria-label="Search GPUs"
         type="text"
-        placeholder='Search GPUs, e.g. "RTX 4090" or "Blackwell"'
+        placeholder="Search GPUs"
         autocomplete="off"
     >
 
@@ -284,7 +286,7 @@
                     </div>
 
 
-                    <select id="analyticsMetric">
+                    <select id="analyticsMetric" aria-label="Trend metric">
 
                         <option value="memory_bandwidth_gbps">
                             Memory Bandwidth
@@ -407,7 +409,7 @@
                     </div>
 
 
-                    <select id="analyticsRankingMetric">
+                    <select id="analyticsRankingMetric" aria-label="Top specification">
 
                         <option value="vram">
                             VRAM
